@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Mesosmesos本身的目的是针对当前的各种分布式系统的抽象，拿原始的操作系统进行对比，内核控制各个进程执行某些任务，而到了分布式时代，要从更高层面去看，把每个物理节点当做一个进程，有专门的服务作为抽象的内核对进程进行调控，分配给各个进程去执行任务，就像下面的图，特别像操作系统的概念。 DC/OSData Center Operating System算是mesos的超集，采用了mesos的ke">
+<meta property="og:type" content="article">
+<meta property="og:title" content="DCOS和mesos">
+<meta property="og:url" content="http://yoursite.com/2018/01/07/DCOS和mesos/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="Mesosmesos本身的目的是针对当前的各种分布式系统的抽象，拿原始的操作系统进行对比，内核控制各个进程执行某些任务，而到了分布式时代，要从更高层面去看，把每个物理节点当做一个进程，有专门的服务作为抽象的内核对进程进行调控，分配给各个进程去执行任务，就像下面的图，特别像操作系统的概念。 DC/OSData Center Operating System算是mesos的超集，采用了mesos的ke">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://docs.mesosphere.com/1.10/img/dcos-architecture-layers.png">
+<meta property="og:updated_time" content="2018-01-07T10:06:17.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="DCOS和mesos">
+<meta name="twitter:description" content="Mesosmesos本身的目的是针对当前的各种分布式系统的抽象，拿原始的操作系统进行对比，内核控制各个进程执行某些任务，而到了分布式时代，要从更高层面去看，把每个物理节点当做一个进程，有专门的服务作为抽象的内核对进程进行调控，分配给各个进程去执行任务，就像下面的图，特别像操作系统的概念。 DC/OSData Center Operating System算是mesos的超集，采用了mesos的ke">
+<meta name="twitter:image" content="https://docs.mesosphere.com/1.10/img/dcos-architecture-layers.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/07/DCOS和mesos/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>DCOS和mesos | Hexo</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/DCOS和mesos/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">DCOS和mesos
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 07:53:06 / Modified: 18:06:17" itemprop="dateCreated datePublished" datetime="2018-01-07T07:53:06+08:00">2018-01-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="Mesos"><a href="#Mesos" class="headerlink" title="Mesos"></a>Mesos</h3><p>mesos本身的目的是针对当前的各种分布式系统的抽象，拿原始的操作系统进行对比，内核控制各个进程执行某些任务，而到了分布式时代，要从更高层面去看，把每个物理节点当做一个进程，有专门的服务作为抽象的内核对进程进行调控，分配给各个进程去执行任务，就像下面的图，特别像操作系统的概念。<br><img src="https://docs.mesosphere.com/1.10/img/dcos-architecture-layers.png" alt="mesos架构"></p>
+<h3 id="DC-OS"><a href="#DC-OS" class="headerlink" title="DC/OS"></a>DC/OS</h3><p>Data Center Operating System<br>算是mesos的超集，采用了mesos的kernel，然后把mesos中常用的framework(mesos中的概念，表示进程要执行的任务，具体到节点就是mesos的某些agent节点组成的安装的具体的分布式软件)整合到了dcos中，并且提供了良好的界面和CLI，也继承了许多企业级服务如marathon和chronos等，用dcos来完成mesos的data center功能十分高效便捷。</p>
+<p><a href="https://support.mesosphere.com/hc/en-us/articles/205097325-How-is-the-Mesosphere-DCOS-different-from-Apache-Mesos-" target="_blank" rel="noopener">https://support.mesosphere.com/hc/en-us/articles/205097325-How-is-the-Mesosphere-DCOS-different-from-Apache-Mesos-</a></p>
+<h3 id="DC-OS是运行容器的最好方式"><a href="#DC-OS是运行容器的最好方式" class="headerlink" title="DC/OS是运行容器的最好方式"></a>DC/OS是运行容器的最好方式</h3><p><a href="https://mesosphere.com/blog/2016/04/19/open-source-dcos/" target="_blank" rel="noopener">https://mesosphere.com/blog/2016/04/19/open-source-dcos/</a></p>
+<p>mesos可以安装运行各种分布式软件，当然也包括docker，不过在最新的mesos1.0中，mesos也实现了自己的容器化技术，就算不安装docker也可以跑容器了。当然，这些容器化技术大概在2015年都统一了标准，互相兼容的。</p>
+<h3 id="mesos的手动配置"><a href="#mesos的手动配置" class="headerlink" title="mesos的手动配置"></a>mesos的手动配置</h3><p>按照magnum中的部署mesos环境的步骤，手动配置的话模板里会有以下和mesos相关的参数：</p>
+<h3 id="magnum部署mesos的流程"><a href="#magnum部署mesos的流程" class="headerlink" title="magnum部署mesos的流程"></a>magnum部署mesos的流程</h3><ul>
+<li>首先准备image文件，在image文件会安装好mesos服务所需的zookeeperd、mesos和marathon服务，以及docker-engine服务。</li>
+<li>先启动magnum参数所指定的几个master虚拟机，启动完成后会对master节点的服务进行配置，并且启动这些服务。</li>
+<li>然后启动agent节点，启动完成后会在节点内部创建<code>/etc/sysconfig/heat-params</code>文件，然后配置agent节点服务，启动服务，最后要等待执行<code>agent_wc_notify</code>操作，并且设置volume服务。</li>
+</ul>
+<h3 id="magnum中coe的设计思路"><a href="#magnum中coe的设计思路" class="headerlink" title="magnum中coe的设计思路"></a>magnum中coe的设计思路</h3><p>按照magnum里的coe的设计思路，是希望集群里所需要的软件都在image里安装好，之后只需要根据选项进行配置启动就可以。<br>那么如果把mesos换成dcos，dcos中涉及到的几十个应用也需要提前安装好，在部署完dcos后也可以随时安装卸载对应应用<br>这就得舍弃dcos提供的安装流程，相当于舍弃已经整合好的安装脚本，换成手动在magnum里重新实现一遍</p>
+<h3 id="dcos的安装流程"><a href="#dcos的安装流程" class="headerlink" title="dcos的安装流程"></a>dcos的安装流程</h3><p>说下advanced安装方式，在每个节点进行执行的操作来手动执行</p>
+<ul>
+<li>先准备两个文件<code>ip-detect</code>和<code>config.yaml</code>，检测IP和进行集群的配置</li>
+<li>下载安装脚本文件，这个shell文件里，其实除了脚本还包含了压缩包二进制文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ curl -O https://downloads.dcos.io/dcos/EarlyAccess/commit/14509fe1e7899f439527fb39867194c7a425c771/dcos_generate_config.sh</span><br></pre></td></tr></table></figure>
+<ul>
+<li>执行<code>dcos_generate_config.sh</code>脚本文件，默认的参数就是<code>--genconf</code>，生成了安装的配置信息，文件和路径信息就会如下</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">├── dcos-genconf.&lt;HASH&gt;.tar</span><br><span class="line">├── dcos_generate_config.sh</span><br><span class="line">├── genconf</span><br><span class="line">│   ├── serve</span><br><span class="line">│   │   ├── dcos_install.sh</span><br><span class="line">│   ├── config.yaml</span><br><span class="line">│   ├── ip-detect</span><br><span class="line">│   ├── cluster_packages.json</span><br><span class="line">│   ├── ssh_key</span><br><span class="line">│   ├── state</span><br></pre></td></tr></table></figure>
+<ul>
+<li>然后执行<code>docker run</code>，这一步会在bootstrap node启动一个nginx的容器服务，映射端口，并且把<code>./genconf/serve/</code>目录映射到nginx容器里的<code>/usr/share/nginx/html</code>，路径映射的结果就是，可以从其他节点访问nginx服务获取<code>serve</code>目录下的文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo docker run -d -p &lt;your-port&gt;:80 -v $PWD/genconf/serve:/usr/share/nginx/html:ro nginx</span><br></pre></td></tr></table></figure>
+<ul>
+<li>剩下的步骤就是登录到各个节点，master和agent节点，下载下来dcos_install.sh，然后执行安装就可以了<br>安装时要指定<code>role</code>，即当前机器为哪类节点，支持<code>master</code>，<code>slave</code>，<code>slave_public</code></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ssh &lt;master-ip&gt;</span><br><span class="line">$ mkdir /tmp/dcos &amp;&amp; cd /tmp/dcos</span><br><span class="line">$ curl -O http://&lt;bootstrap-ip&gt;:&lt;your_port&gt;/dcos_install.sh</span><br><span class="line">$ sudo bash dcos_install.sh master</span><br></pre></td></tr></table></figure>
+<ul>
+<li>最后一步就是等待安装完成并且各个节点之间同步完成，如何检测状态，查看<code>Exhibitor</code>服务的信息</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://&lt;master-ip&gt;:8181/exhibitor/v1/ui/index.html</span><br></pre></td></tr></table></figure>
+<ul>
+<li>现在可以启动DCOS的web界面</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://&lt;master-node-public-ip&gt;/</span><br></pre></td></tr></table></figure>
+<h3 id="bootstrap-node"><a href="#bootstrap-node" class="headerlink" title="bootstrap node"></a>bootstrap node</h3><p>bootstrap节点是干啥的，在安装过程中都会先启动bootstrap node，把要安装的东西压下载到bootstrap node，生成配置文件，然后进行安装。<br>安装时也会通过某种方式把配置文件和安装脚本拷贝到master或者agent节点去，然后在具体的节点上执行安装。<br>文档说bootstrap node是集群的永久性节点，但是个人感觉不是必须的，只是集群必须有一个执行安装程序的节点，卸载时也会需要一个节点来跑执行程序，那么就放到了bootstrap node上，然后bootstrap node也提供了界面化的安装和卸载。<br>如果把安装放到magnum里去做，那么执行安装程序的操作就交给了magnum的HOT去做，拷贝文件也可以由magnum去做，卸载就是直接删除集群节点，整个流程就用不到bootstrap node了。<br>另外，在dcos官网的design页面看到，components需要提前下载，并且是在bootstrap node下载，并且build完成，打包，然后再copy到master或agent节点去安装。<br>那么如果修改的话就方便了，因为dcos_install.sh脚本做的工作就是一个下载，解压，修改配置文件和启动服务。之前的操作放置到DIB里去做。</p>
+<h3 id="在安装过程中，master节点，agent节点和bootstrap节点都做了什么具体的工作"><a href="#在安装过程中，master节点，agent节点和bootstrap节点都做了什么具体的工作" class="headerlink" title="在安装过程中，master节点，agent节点和bootstrap节点都做了什么具体的工作"></a>在安装过程中，master节点，agent节点和bootstrap节点都做了什么具体的工作</h3><p>参照官网文档：<a href="https://dcos.io/docs/1.8/overview/architecture/" target="_blank" rel="noopener">https://dcos.io/docs/1.8/overview/architecture/</a></p>
+<h3 id="DC-OS的安装脚本生成流程，以及安装流程"><a href="#DC-OS的安装脚本生成流程，以及安装流程" class="headerlink" title="DC/OS的安装脚本生成流程，以及安装流程"></a>DC/OS的安装脚本生成流程，以及安装流程</h3><p>dcos的源码下载下来后，根目录执行<code>build_local.sh</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Install the DC/OS tools</span><br><span class="line">./prep_local</span><br><span class="line"></span><br><span class="line"># Build a release of DC/OS</span><br><span class="line">release create `whoami` local_build</span><br></pre></td></tr></table></figure>
+<p>第一步pre_local会执行setuptools的打包脚本，打包出一些需要的命令，比如release命令(python命令)<br>第二步就正式执行打包命令</p>
+<ul>
+<li>下载packages，编译，保存编译结果</li>
+<li>把一些模板文件和配置文件初始化</li>
+<li>把上述的文件根据Dockerfile，docker build出docker image的tar包</li>
+<li>最终把docker image和脚本文件合并成为<code>dcos_generate_config.sh</code></li>
+</ul>
+<p>dcos_generate_config.sh是最初的安装脚本，由脚本和一个docker image二进制数据共同组成。</p>
+<ul>
+<li>脚本由dcos_generate_config.sh.in模板生成</li>
+<li>docker image由配置的各个文件和Dockerfile，一起<code>docker build</code>后进行<code>docker save</code>的一个tar包。所以不能只看tar包信息，需要看<code>docker build</code>前的原始信息。</li>
+</ul>
+<p>执行<code>dcos_generate_config.sh --genconf</code>会生成配置文件，这一步会执行<code>docker run</code>，运行的就是docker image里的内容。那么要看如何生成配置文件，就需要看docker image是如何生成的。<br><code>dcos_generate_config.sh --genconf</code>在源码中的entry_point是<code>ext/dcos-installer/cli.py:main</code></p>
+<p>综上，要抽出安装脚本中需要的部分：packages文件、配置文件以及安装脚本<br>其中packages文件要放到DIB中，配置文件无需改动的放到DIB中，安装脚本和部分需要改动的配置文件放在外面<br>对应到执行命令，就是<code>dcos_generate_config.sh --genconf</code>这个操作时，会变动的配置文件放到外面，其他的放到DIB中</p>
+<ul>
+<li>下载dcos源码，从头制作安装文件<br>这种需要重新下载和build各个packages包，还要初始化各个配置文件，耗时长，也有很多不确定因素会导致失败</li>
+<li>直接下载编译好的dcos_generate_config.sh<br>这种需要执行<code>docker run</code>才能生成配置文件，依赖docker，但是解压文件后都是编译好的packages，节省时间，但是下载整个文件也需要花一定时间。</li>
+</ul>
+<p>制作DIB</p>
+<ul>
+<li>下载<code>dcos_generate_config.sh</code>，执行<code>dcos_generate_config.sh --genconf</code>，生成配置文件</li>
+<li>找到安装过程脚本，单独执行，把packages文件和配置文件放置到对应位置，生成DIB</li>
+</ul>
+<p>magnum中的可配置文件</p>
+<ul>
+<li>找到生成配置文件的脚本，把ip-detect和cloud-config.yaml所影响的配置文件集中放置在magnum中，初始化这些模板文件后，拷贝到对应位置</li>
+<li><code>ext/dcos-installer/cli.py:main</code></li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/07/magnum-bay-create简析/" rel="next" title="Magnum Bay Create简析">
+                <i class="fa fa-chevron-left"></i> Magnum Bay Create简析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/07/solum简介/" rel="prev" title="Solum简介">
+                Solum简介 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Mesos"><span class="nav-number">1.</span> <span class="nav-text">Mesos</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DC-OS"><span class="nav-number">2.</span> <span class="nav-text">DC/OS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DC-OS是运行容器的最好方式"><span class="nav-number">3.</span> <span class="nav-text">DC/OS是运行容器的最好方式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mesos的手动配置"><span class="nav-number">4.</span> <span class="nav-text">mesos的手动配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#magnum部署mesos的流程"><span class="nav-number">5.</span> <span class="nav-text">magnum部署mesos的流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#magnum中coe的设计思路"><span class="nav-number">6.</span> <span class="nav-text">magnum中coe的设计思路</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#dcos的安装流程"><span class="nav-number">7.</span> <span class="nav-text">dcos的安装流程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#bootstrap-node"><span class="nav-number">8.</span> <span class="nav-text">bootstrap node</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在安装过程中，master节点，agent节点和bootstrap节点都做了什么具体的工作"><span class="nav-number">9.</span> <span class="nav-text">在安装过程中，master节点，agent节点和bootstrap节点都做了什么具体的工作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DC-OS的安装脚本生成流程，以及安装流程"><span class="nav-number">10.</span> <span class="nav-text">DC/OS的安装脚本生成流程，以及安装流程</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

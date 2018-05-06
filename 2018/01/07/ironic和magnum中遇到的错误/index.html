@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="涉及到的component有nova, ironic, glance, neutron, magnum, swift基本错误都是在创建虚拟机的过程中发生的 很多openstack的应用场景都是企业内网，一般会有代理服务器和外部网络隔离  用nova boot在bare metal上部署这里和创建虚拟机类似，在nova里都归属为了hypervisor，ironic-conductor会一直和bare">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ironic和magnum中遇到的错误">
+<meta property="og:url" content="http://yoursite.com/2018/01/07/ironic和magnum中遇到的错误/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="涉及到的component有nova, ironic, glance, neutron, magnum, swift基本错误都是在创建虚拟机的过程中发生的 很多openstack的应用场景都是企业内网，一般会有代理服务器和外部网络隔离  用nova boot在bare metal上部署这里和创建虚拟机类似，在nova里都归属为了hypervisor，ironic-conductor会一直和bare">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-01-07T09:57:07.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ironic和magnum中遇到的错误">
+<meta name="twitter:description" content="涉及到的component有nova, ironic, glance, neutron, magnum, swift基本错误都是在创建虚拟机的过程中发生的 很多openstack的应用场景都是企业内网，一般会有代理服务器和外部网络隔离  用nova boot在bare metal上部署这里和创建虚拟机类似，在nova里都归属为了hypervisor，ironic-conductor会一直和bare">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/07/ironic和magnum中遇到的错误/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Ironic和magnum中遇到的错误 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/ironic和magnum中遇到的错误/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Ironic和magnum中遇到的错误
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 07:57:20 / Modified: 17:57:07" itemprop="dateCreated datePublished" datetime="2018-01-07T07:57:20+08:00">2018-01-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>涉及到的component有nova, ironic, glance, neutron, magnum, swift<br>基本错误都是在创建虚拟机的过程中发生的</p>
+<p>很多openstack的应用场景都是企业内网，一般会有代理服务器和外部网络隔离</p>
+<hr>
+<h3 id="用nova-boot在bare-metal上部署"><a href="#用nova-boot在bare-metal上部署" class="headerlink" title="用nova boot在bare metal上部署"></a>用nova boot在bare metal上部署</h3><p>这里和创建虚拟机类似，在nova里都归属为了hypervisor，ironic-conductor会一直和bare metal交互。<br>交互分为两步：先把deploy image安装到机器上，然后用deploy image的操作系统把user image写入到机器的硬盘内。<br>在deploy image启动过程中会出现许多问题。</p>
+<p>ironic在mitaka版本以前都只支持flat网络模式，如果创建一个新的节点，会在flat网络中添加一个port。<br>就如neutron port-list中，多出来一个port，而这个port对应于bare metal的四个网口中的一个。</p>
+<p>baremetal的inspection操作之后，会自动创建多个port，服务器一般都有四个网口，那么就创建四个port。<br>当nova boot时，会随机选中一个port的mac地址和neutron的网络关联起来，所以就有了ironic node和neutron port的一一对应。<br>但是，实验时有时为了方便，四个网口只插了一跟网线，这在启动过程中就会出问题。</p>
+<p>deploy image的挂载没问题，启动过程也不影响，当启动完成后，当bare metal希望和ironic-conductor交互时，网络就连不通了。<br>为何连不通，因为neutron注册的是某个port，只能和这个port交互，但是bare metal这个port没有插网线，数据出不来，然后就悲剧了。</p>
+<p>ironic自动创建的port有四个<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">stack@Magnum:~/devstack$ ironic port-list</span><br><span class="line">+--------------------------------------+-------------------+</span><br><span class="line">| UUID                                 | Address           |</span><br><span class="line">+--------------------------------------+-------------------+</span><br><span class="line">| bc05cbb9-b6fd-4ebc-b860-81f0033c8828 | ec:b1:d7:83:74:43 |</span><br><span class="line">| 34a4e46c-ff1f-4a24-b351-6a9bb1a5f21b | ec:b1:d7:83:74:42 |</span><br><span class="line">| 3e40c8d2-4f7b-430d-85e3-a884ca48acd0 | ec:b1:d7:83:74:41 |</span><br><span class="line">| 0035a7c8-534c-4d41-a8e0-c0271384408c | ec:b1:d7:83:74:40 |</span><br><span class="line">+--------------------------------------+-------------------+</span><br></pre></td></tr></table></figure></p>
+<p>而在ironic conductor服务这边，通过br-ex一直ping不通nova boot的instance分配的ip<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">stack@Magnum:~/devstack$ ping -I br-ex 172.30.100.104</span><br><span class="line">PING 172.30.100.104 (172.30.100.104) from 172.30.100.10 br-ex: 56(84) bytes of data.</span><br><span class="line">From 172.30.100.10 icmp_seq=1 Destination Host Unreachable</span><br></pre></td></tr></table></figure></p>
+<p>查看neutron的port信息<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">stack@Magnum:~/devstack$ neutron port-list</span><br><span class="line">+--------------------------------------+------+-------------------+----------------------------------------------------+</span><br><span class="line">| id                                   | name | mac_address       | fixed_ips                                          |</span><br><span class="line">+--------------------------------------+------+-------------------+----------------------------------------------------+</span><br><span class="line">| 3eebcadf-3b22-4208-8960-fed19b2d124b |      | ec:b1:d7:83:74:41 | &#123;&quot;subnet_id&quot;:                                      |</span><br><span class="line">|                                      |      |                   | &quot;59b992ff-1567-4132-a777-70545c075035&quot;,            |</span><br><span class="line">|                                      |      |                   | &quot;ip_address&quot;: &quot;172.30.100.104&quot;&#125;                    |</span><br><span class="line">| a0e1fc5f-15bb-4840-98fb-0577422a62f6 |      | fa:16:3e:0f:14:91 | &#123;&quot;subnet_id&quot;:                                      |</span><br><span class="line">|                                      |      |                   | &quot;59b992ff-1567-4132-a777-70545c075035&quot;,            |</span><br><span class="line">|                                      |      |                   | &quot;ip_address&quot;: &quot;172.30.100.100&quot;&#125;                    |</span><br><span class="line">+--------------------------------------+------+-------------------+----------------------------------------------------+</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，neutron port-list中新创建的这个port的mac address和ironic port-list中的某个port对应</p>
+<p>neutron网络创建port时，是根据ironic node已有的port进行随机创建的，所以删掉没插网线的port，或者把四个网口全插上网线，这个问题就解决了。</p>
+<hr>
+<h3 id="ironic-node-inspection时-clean-node-failed"><a href="#ironic-node-inspection时-clean-node-failed" class="headerlink" title="ironic node inspection时 clean node failed"></a>ironic node inspection时 clean node failed</h3><p>在inspection时会自动执行clean node，但是会clean失败（为何失败？）<br>先避开这个功能，在/etc/ironic/ironic.conf中设置<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">autoclean=False</span><br></pre></td></tr></table></figure></p>
+<hr>
+<h3 id="ironic在deoloy过程中，因为某些原因导致deploy失败，会产生脏数据，ironic-node已经绑定instance-uuid，但是instance已经被删除"><a href="#ironic在deoloy过程中，因为某些原因导致deploy失败，会产生脏数据，ironic-node已经绑定instance-uuid，但是instance已经被删除" class="headerlink" title="ironic在deoloy过程中，因为某些原因导致deploy失败，会产生脏数据，ironic node已经绑定instance uuid，但是instance已经被删除"></a>ironic在deoloy过程中，因为某些原因导致deploy失败，会产生脏数据，ironic node已经绑定instance uuid，但是instance已经被删除</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Error contacting Ironic server: Node b362d8ce-1fd3-4cff-afac-c12f01fc02d9 is associated with instance 0d1c7ced-3137-46ce-a3ba-beb7b0c490e1. (HTTP 409). Attempt 2 of 2</span><br></pre></td></tr></table></figure>
+<p>这个错误有可能是个隐藏BUG，在ironic的deploy image启动完成后，网络不通连接不上ironic conductor的话，timeout之后，<code>instance就失败被删除????</code>，然后就留下来脏数据。<br>一般通过两种方式清理掉：</p>
+<p>正规的就是ironic node-set-maintance <uuid> true，然后ironic node-delete<br>另一种不推荐，就是直接进入数据库改数据，把instance uuid置为NULL</uuid></p>
+<hr>
+<h3 id="magnum-bay-create时会出现请求不到外网的错误"><a href="#magnum-bay-create时会出现请求不到外网的错误" class="headerlink" title="magnum bay-create时会出现请求不到外网的错误"></a>magnum bay-create时会出现请求不到外网的错误</h3><p>magnum本身是和容器结合的模块，在创建时时会有一个请求discovery url的过程，是外网地址，企业内网中要死不死的没有设置代理的话，就会出错。<br>magnum的github上有说可以在命令行指定代理参数，但是估计是比较新的版本上有的，我在公司机器上试会找不到这个参数。<br>Openstack官方文档：<a href="http://docs.openstack.org/developer/magnum/troubleshooting-guide.html#etcd-service" target="_blank" rel="noopener">http://docs.openstack.org/developer/magnum/troubleshooting-guide.html#etcd-service</a><br>这个对外网的请求是和etcd service有关，etcd是一个高可用的键值存储系统，主要用于共享配置和服务发现，灵感来源于zookeeper.<br>在集群中，用于同步同类节点之间的状态，replication等等的功能都得依靠这个。</p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/07/bash-shell-tips/" rel="next" title="Bash Shell Tips">
+                <i class="fa fa-chevron-left"></i> Bash Shell Tips
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/07/swift的相关问题/" rel="prev" title="Swift的相关问题">
+                Swift的相关问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#用nova-boot在bare-metal上部署"><span class="nav-number">1.</span> <span class="nav-text">用nova boot在bare metal上部署</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ironic-node-inspection时-clean-node-failed"><span class="nav-number">2.</span> <span class="nav-text">ironic node inspection时 clean node failed</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ironic在deoloy过程中，因为某些原因导致deploy失败，会产生脏数据，ironic-node已经绑定instance-uuid，但是instance已经被删除"><span class="nav-number">3.</span> <span class="nav-text">ironic在deoloy过程中，因为某些原因导致deploy失败，会产生脏数据，ironic node已经绑定instance uuid，但是instance已经被删除</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#magnum-bay-create时会出现请求不到外网的错误"><span class="nav-number">4.</span> <span class="nav-text">magnum bay-create时会出现请求不到外网的错误</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

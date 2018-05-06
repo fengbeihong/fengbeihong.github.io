@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="安装新的nvidia驱动遇到了内核模块签名的问题在linux系统里安装了nvidia的CUDA，然后在支持UEFI的系统里启动会报错。检查发现，系统的新安装的驱动，即新添加的一些nvidia相关的kernel module没有被sign，在secure boot启动过程中check failed。 这里检查时主要有两个：一个是fedora文档，一个是nvidia文档  fedora文档  nvid">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sign Kernel Module for Secure Boot">
+<meta property="og:url" content="http://yoursite.com/2018/01/07/sign-kernel-module-for-secure-boot/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="安装新的nvidia驱动遇到了内核模块签名的问题在linux系统里安装了nvidia的CUDA，然后在支持UEFI的系统里启动会报错。检查发现，系统的新安装的驱动，即新添加的一些nvidia相关的kernel module没有被sign，在secure boot启动过程中check failed。 这里检查时主要有两个：一个是fedora文档，一个是nvidia文档  fedora文档  nvid">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-01-07T10:08:29.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Sign Kernel Module for Secure Boot">
+<meta name="twitter:description" content="安装新的nvidia驱动遇到了内核模块签名的问题在linux系统里安装了nvidia的CUDA，然后在支持UEFI的系统里启动会报错。检查发现，系统的新安装的驱动，即新添加的一些nvidia相关的kernel module没有被sign，在secure boot启动过程中check failed。 这里检查时主要有两个：一个是fedora文档，一个是nvidia文档  fedora文档  nvid">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/07/sign-kernel-module-for-secure-boot/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Sign Kernel Module for Secure Boot | Hexo</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/sign-kernel-module-for-secure-boot/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Sign Kernel Module for Secure Boot
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 07:52:44 / Modified: 18:08:29" itemprop="dateCreated datePublished" datetime="2018-01-07T07:52:44+08:00">2018-01-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="安装新的nvidia驱动遇到了内核模块签名的问题"><a href="#安装新的nvidia驱动遇到了内核模块签名的问题" class="headerlink" title="安装新的nvidia驱动遇到了内核模块签名的问题"></a>安装新的nvidia驱动遇到了内核模块签名的问题</h3><p>在linux系统里安装了nvidia的CUDA，然后在支持UEFI的系统里启动会报错。<br>检查发现，系统的新安装的驱动，即新添加的一些nvidia相关的kernel module没有被sign，在secure boot启动过程中check failed。</p>
+<p>这里检查时主要有两个：一个是fedora文档，一个是nvidia文档</p>
+<ul>
+<li><p><a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/System_Administrators_Guide/sect-signing-kernel-modules-for-secure-boot.html" target="_blank" rel="noopener">fedora文档</a></p>
+</li>
+<li><p><a href="http://us.download.nvidia.com/XFree86/Linux-x86/319.12/README/installdriver.html" target="_blank" rel="noopener">nvidia文档</a></p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># sh ./NVIDIA-Linux-x86-319.12.run -s \</span><br><span class="line">--module-signing-secret-key=/path/to/signing.key \</span><br><span class="line">--module-signing-public-key=/path/to/signing.x509</span><br></pre></td></tr></table></figure>
+<p>这里有说明用nvidia的runfile加参数，runfile会自动给你签名，但是安装CUDA的时候下载的runfile报错没有这些参数</p>
+<p>顺便一说，CUDA的安装也有两种方式：rpm和runfile<br><a href="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf" target="_blank" rel="noopener">http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf</a></p>
+<p>在rpm方式下已经安装成功，因为rpm基本都是下载文件，然后安装文件，最后一步直接yum install cuda完成所有依赖的东西的安装</p>
+<p>runfile的话则是先要进行一些配置文件的修改，有些命令会执行失败</p>
+<hr>
+<h3 id="手动siging-kernel-module的流程"><a href="#手动siging-kernel-module的流程" class="headerlink" title="手动siging kernel module的流程"></a>手动siging kernel module的流程</h3><h4 id="需要的tools"><a href="#需要的tools" class="headerlink" title="需要的tools"></a>需要的tools</h4><ul>
+<li>openssl      openssl</li>
+<li>sign-file    kernel-devel</li>
+<li>perl         perl</li>
+<li>mokutil      mokutil</li>
+<li>keyctl       keyutils</li>
+</ul>
+<p>其中，openssl、sign-file和perl都是在build system里操作。<br>openssl用来生成密钥对，perl命令用来执行sign-file这个脚本文件，来给kernel module进行签名</p>
+<p>mokutil和keyctl是在Target system执行。<br>mokutil用来enroll the public key，就是把公钥加到<code>MOK(Machine Owner Key)</code>表里。<br>keyctl用来显示<code>system key ring</code>里的公钥</p>
+<blockquote>
+<p>在build system里，不需要UEFI Secure Boot被enabled也不需要是一个支持UEFI的系统</p>
+</blockquote>
+<h4 id="kernel-module-authentication"><a href="#kernel-module-authentication" class="headerlink" title="kernel module authentication"></a>kernel module authentication</h4><p>fedora系统中，内核模块加载后，内核模块的签名signature会用存储在内核的system key ring里的公钥进行检查，包括检查白名单和黑名单。</p>
+<p>在启动的时候，内核会从多处加载X.509 keys，加载到system key ring里，以便后面的对内核模块的check。<br>可以查看具体哪些source: <a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/System_Administrators_Guide/sect-kernel-module-authentication.html#table-sources-for-system-key-rings" target="_blank" rel="noopener">Sources For System Key Rings</a></p>
+<ul>
+<li>Embedded in kernel</li>
+<li>UEFI Secure Boot “db”</li>
+<li>UEFI Secure Boot “dbx”</li>
+<li>Embedded in shim.efi boot loader</li>
+<li>Machine Owner Key (MOK) list</li>
+</ul>
+<p>kernel本身用户无法操作，UEFI的处于机器固件层面的，不好操作，就剩下shim.efi和MOK了。</p>
+<p>在正常的系统中，shim.efi用户无法直接改动的，但在制作虚拟机镜像的时候，可以直接修改内核的所有文件，这时就可以替换或修改这个efi文件。<br>而通常情况下，比如在运行中的系统中，一般会用命令去操作MOK表，把前面步骤里生成的key注入到MOK中。</p>
+<blockquote>
+<ul>
+<li>如果uefi secure boot没有启动或系统本身就不支持uefi secure boot，那么内核只会加载keys Embedded in kernel。</li>
+<li>黑名单有更高优先级，如果存在于黑名单中了，那么就算内核模块以及签名也没用</li>
+</ul>
+</blockquote>
+<p>下面是几个显示system key ring中密钥列表的命令例子：</p>
+<p>UEFI Secure Boot is not enabled</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~]# keyctl list %:.system_keyring</span><br><span class="line">1 key in keyring:</span><br><span class="line"> 61139991: ---lswrv     0     0 asymmetric: Fedora kernel signing key: 1fc9e68f7419556348fdee2fdeb7ff9da6337b</span><br></pre></td></tr></table></figure>
+<p>UEFI Secure Boot is enabled</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">~]# keyctl list %:.system_keyring</span><br><span class="line">6 keys in keyring:</span><br><span class="line">...asymmetric: Red Hat Enterprise Linux Driver Update Program (key 3): bf57f3e87...</span><br><span class="line">...asymmetric: Red Hat Secure Boot (CA key 1): 4016841644ce3a810408050766e8f8a29...</span><br><span class="line">...asymmetric: Microsoft Corporation UEFI CA 2011: 13adbf4309bd82709c8cd54f316ed...</span><br><span class="line">...asymmetric: Microsoft Windows Production PCA 2011: a92902398e16c49778cd90f99e...</span><br><span class="line">...asymmetric: Red Hat Enterprise Linux kernel signing key: 4249689eefc77e95880b...</span><br><span class="line">...asymmetric: Red Hat Enterprise Linux kpatch signing key: 4d38fd864ebe18c5f0b7...</span><br></pre></td></tr></table></figure>
+<p>可以查看kernel console messages，查看密钥是从哪里加载进来的。示例中是搜索从efi文件加载的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~]# dmesg | grep &apos;EFI: Loaded cert&apos;</span><br><span class="line">[5.160660] EFI: Loaded cert &apos;Microsoft Windows Production PCA 2011: a9290239...</span><br><span class="line">[5.160674] EFI: Loaded cert &apos;Microsoft Corporation UEFI CA 2011: 13adbf4309b...</span><br><span class="line">[5.165794] EFI: Loaded cert &apos;Red Hat Secure Boot (CA key 1): 4016841644ce3a8...</span><br></pre></td></tr></table></figure>
+<h4 id="kernel-module在启动过程中的规则"><a href="#kernel-module在启动过程中的规则" class="headerlink" title="kernel module在启动过程中的规则"></a>kernel module在启动过程中的规则</h4><p>kernel module在启动过程中可能被检测，因为还要依托于一个参数<code>module.sig_enforce</code>。</p>
+<p>kernel module在启动过程中的整体流程</p>
+<p>key是否强制加载，是否找到，是否验证通过，是否支持uefi secure boot，内核模块是否加载成功，内核是否被污染</p>
+<p><a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/System_Administrators_Guide/sect-kernel-module-authentication-requirements.html#table-kernel-module-authentication-requirements-for-loading" target="_blank" rel="noopener">Kernel Module Authentication Requirements for Loading</a></p>
+<h4 id="生成密钥"><a href="#生成密钥" class="headerlink" title="生成密钥"></a>生成密钥</h4><ul>
+<li>用openssl生成X.509密钥对<br>执行命令时依赖一个配置文件，要先创建一个配置文件(尖括号括起来的需要手动修改)</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">~]# cat &lt;&lt; EOF &gt; configuration_file.config</span><br><span class="line">[ req ]</span><br><span class="line">default_bits = 4096</span><br><span class="line">distinguished_name = req_distinguished_name</span><br><span class="line">prompt = no</span><br><span class="line">string_mask = utf8only</span><br><span class="line">x509_extensions = myexts</span><br><span class="line"></span><br><span class="line">[ req_distinguished_name ]</span><br><span class="line">O = &lt;Organization&gt;</span><br><span class="line">CN = &lt;Organization signing key&gt;</span><br><span class="line">emailAddress = &lt;E-mail address&gt;</span><br><span class="line"></span><br><span class="line">[ myexts ]</span><br><span class="line">basicConstraints=critical,CA:FALSE</span><br><span class="line">keyUsage=digitalSignature</span><br><span class="line">subjectKeyIdentifier=hash</span><br><span class="line">authorityKeyIdentifier=keyid</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<ul>
+<li>执行openssl命令</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~]# openssl req -x509 -new -nodes -utf8 -sha256 -days 36500 \</span><br><span class="line">&gt; -batch -config configuration_file.config -outform DER \</span><br><span class="line">&gt; -out public_key.der \</span><br><span class="line">&gt; -keyout private_key.priv</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意保护私钥</p>
+</blockquote>
+<h4 id="把生成的密钥加入到target-system的多种途径"><a href="#把生成的密钥加入到target-system的多种途径" class="headerlink" title="把生成的密钥加入到target system的多种途径"></a>把生成的密钥加入到target system的多种途径</h4><p>因为内核从多处加载密钥，所以也有多种方式放置密钥</p>
+<ul>
+<li><p>让服务器硬件厂商把你自己生成的密钥加入到他们自己的固件镜像的UEFI Secure Boot key database</p>
+<blockquote>
+<p>有db和dbx两种database，内核加载是会过滤掉dbx中的失效key(revoked key)</p>
+</blockquote>
+</li>
+<li><p><a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/System_Administrators_Guide/sect-executable-key-enrollment-image-adding-public-key.html" target="_blank" rel="noopener">Executable Key Enrollment Image Adding Public Key</a><br>没太理解，应该是是编辑一个已有的image</p>
+</li>
+<li><p>手动把public key加入到MOK list<br>MOK是fedora里的一个功能，The MOK facility is supported by shim.efi, MokManager.efi, grubx64.efi, and the Fedora mokutil utility.</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]# mokutil --import my_signing_key_pub.der</span><br></pre></td></tr></table></figure>
+<p>reboot the machine</p>
+<p>MOK key enrollment的请求会被shim.efi注意到，然后它会调用MokManager.efi，从UEFI console完成密钥的登记。这时候你需要输入你刚才mokutil命令输入的密码</p>
+<blockquote>
+<p>对于ironic的user image怎么办？？，无法启动，是否会在image加载后，启动时完成enrollment??</p>
+</blockquote>
+<h4 id="Signing-Kernel-Module-with-the-Private-Key"><a href="#Signing-Kernel-Module-with-the-Private-Key" class="headerlink" title="Signing Kernel Module with the Private Key"></a>Signing Kernel Module with the Private Key</h4><ul>
+<li>编译出来module(或者其他方式生成的module)</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]# make -C /usr/src/kernels/$(uname -r) M=$PWD modules</span><br></pre></td></tr></table></figure>
+<ul>
+<li>执行perl脚本，签名</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">~]# perl /usr/src/kernels/$(uname -r)/scripts/sign-file \</span><br><span class="line">&gt; sha256 \</span><br><span class="line">&gt; my_signing_key.priv \</span><br><span class="line">&gt; my_signing_key_pub.der \</span><br><span class="line">&gt; my_module.ko</span><br></pre></td></tr></table></figure>
+<ul>
+<li>可以用modinfo来查看module的信息，<a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/System_Administrators_Guide/sec-Displaying_Information_About_a_Module.html" target="_blank" rel="noopener">链接</a></li>
+</ul>
+<h4 id="加载signed-kernel-module"><a href="#加载signed-kernel-module" class="headerlink" title="加载signed kernel module"></a>加载signed kernel module</h4><ul>
+<li>首先确认系统本次启动中内核没有加载密钥，用命令来查看system keyring</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keyctl list %:.system_keyring</span><br></pre></td></tr></table></figure>
+<ul>
+<li>像之前的步骤一样，把公钥登记到MOK中，准确点叫做请求登记</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]# mokutil --import my_signing_key_pub.der</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Reboot, and complete the enrollment at the UEFI console.</li>
+<li>重启后，再次检查keyring</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keyctl list %:.system_keyring</span><br></pre></td></tr></table></figure>
+<ul>
+<li>现在则可以正常的加载你的kernel module了</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~]# modprobe -v my_module</span><br><span class="line">insmod /lib/modules/3.17.4-302.fc21.x86_64/extra/my_module.ko</span><br><span class="line">~]# lsmod | grep my_module</span><br><span class="line">my_module 12425 0</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>有个疑问，这里内核模块没有签名，则该内核模块加载失败，</p>
+</blockquote>
+<h4 id="kernel-modules-and-their-utilities"><a href="#kernel-modules-and-their-utilities" class="headerlink" title="kernel modules and their utilities"></a>kernel modules and their utilities</h4><p>一些内核相关的命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">lsmod(8) — The manual page for the lsmod command.</span><br><span class="line">modinfo(8) — The manual page for the modinfo command.</span><br><span class="line">modprobe(8) — The manual page for the modprobe command.</span><br><span class="line">rmmod(8) — The manual page for the rmmod command.</span><br><span class="line">ethtool(8) — The manual page for the ethtool command.</span><br><span class="line">mii-tool(8) — The manual page for the mii-tool command.</span><br></pre></td></tr></table></figure>
+<h3 id="回到对ironic-user-image的签名"><a href="#回到对ironic-user-image的签名" class="headerlink" title="回到对ironic user image的签名"></a>回到对ironic user image的签名</h3><p>回到实际的场景，对添加了nvidia kernel module的image进行签名，有以下几种可操作的方法：</p>
+<ul>
+<li>使用自签名，那么使用命令操作MOK后，系统文件里就包含密钥了，但是需要把这个密钥最终写入到uefi主板上，这一步需要在系统启动时手动操作，所以无法自动化。</li>
+<li>使用已有签名，就是uefi主板的数据库里已经带了默认密钥，是在出厂时就写入的官方公钥。所以如果想想一个内核模块加载成功，就需要这个内核模块被官方的私钥签名，但是这个操作个人是无法做的，只能由fedora官方来做。</li>
+</ul>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/07/如何向openstack提交代码/" rel="next" title="如何向openstack提交代码">
+                <i class="fa fa-chevron-left"></i> 如何向openstack提交代码
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/07/UEFI-secure-boot/" rel="prev" title="UEFI Secure Boot">
+                UEFI Secure Boot <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#安装新的nvidia驱动遇到了内核模块签名的问题"><span class="nav-number">1.</span> <span class="nav-text">安装新的nvidia驱动遇到了内核模块签名的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#手动siging-kernel-module的流程"><span class="nav-number">2.</span> <span class="nav-text">手动siging kernel module的流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#需要的tools"><span class="nav-number">2.1.</span> <span class="nav-text">需要的tools</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kernel-module-authentication"><span class="nav-number">2.2.</span> <span class="nav-text">kernel module authentication</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kernel-module在启动过程中的规则"><span class="nav-number">2.3.</span> <span class="nav-text">kernel module在启动过程中的规则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#生成密钥"><span class="nav-number">2.4.</span> <span class="nav-text">生成密钥</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#把生成的密钥加入到target-system的多种途径"><span class="nav-number">2.5.</span> <span class="nav-text">把生成的密钥加入到target system的多种途径</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Signing-Kernel-Module-with-the-Private-Key"><span class="nav-number">2.6.</span> <span class="nav-text">Signing Kernel Module with the Private Key</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#加载signed-kernel-module"><span class="nav-number">2.7.</span> <span class="nav-text">加载signed kernel module</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#kernel-modules-and-their-utilities"><span class="nav-number">2.8.</span> <span class="nav-text">kernel modules and their utilities</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#回到对ironic-user-image的签名"><span class="nav-number">3.</span> <span class="nav-text">回到对ironic user image的签名</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="swagger-ui的使用 首先有个swagger-ui这个项目，可以根据swagger.json文件的内容，以一种非常漂亮的页面风格显示api信息。 可以直接下载swagger-ui的项目代码，在dist目录下有已经用npm编译好的html页面，直接打开index.html就可以看到。 在地址栏里会是一个默认的值http://petstore.swagger.io/v2/swagger.json">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何使用swagger整合api">
+<meta property="og:url" content="http://yoursite.com/2018/01/17/如何使用swagger整合api/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="swagger-ui的使用 首先有个swagger-ui这个项目，可以根据swagger.json文件的内容，以一种非常漂亮的页面风格显示api信息。 可以直接下载swagger-ui的项目代码，在dist目录下有已经用npm编译好的html页面，直接打开index.html就可以看到。 在地址栏里会是一个默认的值http://petstore.swagger.io/v2/swagger.json">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-01-17T02:37:19.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何使用swagger整合api">
+<meta name="twitter:description" content="swagger-ui的使用 首先有个swagger-ui这个项目，可以根据swagger.json文件的内容，以一种非常漂亮的页面风格显示api信息。 可以直接下载swagger-ui的项目代码，在dist目录下有已经用npm编译好的html页面，直接打开index.html就可以看到。 在地址栏里会是一个默认的值http://petstore.swagger.io/v2/swagger.json">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/17/如何使用swagger整合api/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>如何使用swagger整合api | Hexo</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/17/如何使用swagger整合api/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="John Doe">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">如何使用swagger整合api
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-17 02:36:59 / Modified: 10:37:19" itemprop="dateCreated datePublished" datetime="2018-01-17T02:36:59+08:00">2018-01-17</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="swagger-ui的使用"><a href="#swagger-ui的使用" class="headerlink" title="swagger-ui的使用"></a>swagger-ui的使用</h2><ul>
+<li>首先有个swagger-ui这个项目，可以根据<code>swagger.json</code>文件的内容，以一种非常漂亮的页面风格显示api信息。</li>
+<li>可以直接下载swagger-ui的项目代码，在<code>dist</code>目录下有已经用npm编译好的html页面，直接打开<code>index.html</code>就可以看到。</li>
+<li>在地址栏里会是一个默认的值<code>http://petstore.swagger.io/v2/swagger.json</code>，这个值是获取的一个server下的某个路径下的<code>swagger.json</code>文件，所以如果你想自己编写一个<code>swagger.json</code>文件，也必须放在一个服务下跑，才可以正常显示api。</li>
+</ul>
+<h2 id="如何编写swagger-json"><a href="#如何编写swagger-json" class="headerlink" title="如何编写swagger.json"></a>如何编写swagger.json</h2><ul>
+<li><code>swagger.json</code>有自己的格式，我们写代码时不可能写一个api就修改下<code>swagger.json</code>文件，所以需要一种自动生成<code>swagger.json</code>的工具。</li>
+<li>一般是借鉴其他语言里的形式，在函数上以特殊规则编写注释，这样就可以使用工具统一生成<code>swagger.json</code>文件</li>
+<li>最早注释的形式是在beego里自动集成的，后来<code>https://github.com/yvasiyarov/swagger</code>借鉴beego编写了一个工具，根据注释可以生成各种格式的文档，再后来vmware赞助了一个项目<code>https://github.com/go-swagger/go-swagger</code>，就是借鉴了yvasiyarov的思路，功能更加完善。</li>
+</ul>
+<h2 id="如何使用go-swagger"><a href="#如何使用go-swagger" class="headerlink" title="如何使用go-swagger"></a>如何使用go-swagger</h2><p>假设已经有一些编写好的go代码文件，直接在目录下执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger generate spec -o ./swagger.json</span><br></pre></td></tr></table></figure></p>
+<p>有了<code>swagger.json</code>文件之后，可以放到项目里保存。如果想查看api信息，可以执行以下命令启动服务。</p>
+<blockquote>
+<p>参照openshift项目，只保存json文件就可以。如果想在web服务的指定端口直接可以访问API文档，那另说</p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger serve swagger.json</span><br></pre></td></tr></table></figure>
+<p>默认自动启动一个<code>OpenAPI</code>风格的API文档<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:61593/docs</span><br></pre></td></tr></table></figure></p>
+<p>而此时<code>swagger.json</code>文件的服务器地址是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:61593/swagger.json</span><br></pre></td></tr></table></figure></p>
+<p>需要把这个地址放到<code>swagger-ui</code>里，就可以显示<code>swagger-ui</code>风格的API文档</p>
+<h2 id="如何编写api注释"><a href="#如何编写api注释" class="headerlink" title="如何编写api注释"></a>如何编写api注释</h2><p>下面是一个例子，详细的可以参考goswagger的文档<code>https://goswagger.io</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">// swagger:operation GET /v1/auth/domain/get domainController getDomainInfo</span><br><span class="line">//</span><br><span class="line">// If the request is successful, will return domain information that the user be able to access.</span><br><span class="line">//</span><br><span class="line">// The system will check user permissions.</span><br><span class="line">// So,you must first login system,and then you can send the request.</span><br><span class="line">//</span><br><span class="line">// You must pass in two arguments, first is offset ,second is limit.</span><br><span class="line">//</span><br><span class="line">// ---</span><br><span class="line">// produces:</span><br><span class="line">// - application/json</span><br><span class="line">// - application/xml</span><br><span class="line">// - text/xml</span><br><span class="line">// - text/html</span><br><span class="line">// parameters:</span><br><span class="line">// - name: offset</span><br><span class="line">//   in: query</span><br><span class="line">//   description: start row number</span><br><span class="line">//   required: true</span><br><span class="line">//   type: integer</span><br><span class="line">//   format: int32</span><br><span class="line">// - name: limit</span><br><span class="line">//   in: query</span><br><span class="line">//   description: maximum number of results to return</span><br><span class="line">//   required: true</span><br><span class="line">//   type: integer</span><br><span class="line">//   format: int32</span><br><span class="line">// responses:</span><br><span class="line">//   &apos;200&apos;:</span><br><span class="line">//     description: success</span><br><span class="line">//   &apos;403&apos;:</span><br><span class="line">//     description: Insufficient permissions</span><br><span class="line">//   &apos;421&apos;:</span><br><span class="line">//     description: get domain information failed.</span><br></pre></td></tr></table></figure></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/07/swift的相关问题/" rel="next" title="Swift的相关问题">
+                <i class="fa fa-chevron-left"></i> Swift的相关问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/05/05/hello-world/" rel="prev" title="Hello World">
+                Hello World <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#swagger-ui的使用"><span class="nav-number">1.</span> <span class="nav-text">swagger-ui的使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何编写swagger-json"><span class="nav-number">2.</span> <span class="nav-text">如何编写swagger.json</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何使用go-swagger"><span class="nav-number">3.</span> <span class="nav-text">如何使用go-swagger</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何编写api注释"><span class="nav-number">4.</span> <span class="nav-text">如何编写api注释</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">John Doe</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
