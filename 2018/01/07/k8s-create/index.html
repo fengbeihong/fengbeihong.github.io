@@ -103,13 +103,14 @@
 
 
   <meta name="description" content="1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计">
+<meta name="keywords" content="k8s">
 <meta property="og:type" content="article">
 <meta property="og:title" content="kubernetes pod create流程">
 <meta property="og:url" content="http://yoursite.com/2018/01/07/k8s-create/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-05-07T02:36:34.455Z">
+<meta property="og:updated_time" content="2018-05-07T12:20:30.466Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="kubernetes pod create流程">
 <meta name="twitter:description" content="1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计">
@@ -336,7 +337,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-05-07 10:36:34" itemprop="dateModified" datetime="2018-05-07T10:36:34+08:00">2018-05-07</time>
+                <time title="Modified: 2018-05-07 20:20:30" itemprop="dateModified" datetime="2018-05-07T20:20:30+08:00">2018-05-07</time>
               
             
           </span>
@@ -387,6 +388,12 @@
     
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+        </div>
       
 
       
@@ -474,7 +481,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-count">15</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -491,7 +498,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">1</span>
+                      
+                    
+                    <span class="site-state-item-count">2</span>
                     <span class="site-state-item-name">tags</span>
                   
                 </div>

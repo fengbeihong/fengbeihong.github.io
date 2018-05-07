@@ -102,24 +102,27 @@
 
 
 
-  <meta name="description" content="linux的boot有一套流程：firware-&amp;gt;media-&amp;gt;bootloader-&amp;gt;kernel(kernel module)-&amp;gt;init  firmware发现可启动media，加载media（远程启动等） bootloader从boot media加载kernel到RAM里，然后启动（会根据硬盘分区表之类的发现kernel，然后继续加载kernel module之类">
+  <meta name="description" content="在kubernetes的Pod启动时，会有一个叫做pause的容器先启动，然后才会轮到有真正服务的pod容器启动。这个pod的作用是什么呢？ pause容器的Dockerfile的内容很少 1234FROM scratchARG ARCHADD bin/pause-$&amp;#123;ARCH&amp;#125; /pauseENTRYPOINT [&amp;quot;/pause&amp;quot;] 可以看到，这里就启动了">
+<meta name="keywords" content="k8s">
 <meta property="og:type" content="article">
-<meta property="og:title" content="UEFI Secure Boot">
-<meta property="og:url" content="http://yoursite.com/2018/01/07/UEFI-secure-boot/index.html">
+<meta property="og:title" content="k8s里的pause镜像">
+<meta property="og:url" content="http://yoursite.com/2018/05/07/k8s-k8s里的pause镜像/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="linux的boot有一套流程：firware-&amp;gt;media-&amp;gt;bootloader-&amp;gt;kernel(kernel module)-&amp;gt;init  firmware发现可启动media，加载media（远程启动等） bootloader从boot media加载kernel到RAM里，然后启动（会根据硬盘分区表之类的发现kernel，然后继续加载kernel module之类">
+<meta property="og:description" content="在kubernetes的Pod启动时，会有一个叫做pause的容器先启动，然后才会轮到有真正服务的pod容器启动。这个pod的作用是什么呢？ pause容器的Dockerfile的内容很少 1234FROM scratchARG ARCHADD bin/pause-$&amp;#123;ARCH&amp;#125; /pauseENTRYPOINT [&amp;quot;/pause&amp;quot;] 可以看到，这里就启动了">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-01-07T10:07:01.000Z">
+<meta property="og:image" content="http://yoursite.com/2018/05/07/k8s-k8s里的pause镜像/images/80C0C662-1BB9-4FD3-A943-91ABE65E5B0B.png">
+<meta property="og:updated_time" content="2018-05-07T12:23:41.620Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="UEFI Secure Boot">
-<meta name="twitter:description" content="linux的boot有一套流程：firware-&amp;gt;media-&amp;gt;bootloader-&amp;gt;kernel(kernel module)-&amp;gt;init  firmware发现可启动media，加载media（远程启动等） bootloader从boot media加载kernel到RAM里，然后启动（会根据硬盘分区表之类的发现kernel，然后继续加载kernel module之类">
+<meta name="twitter:title" content="k8s里的pause镜像">
+<meta name="twitter:description" content="在kubernetes的Pod启动时，会有一个叫做pause的容器先启动，然后才会轮到有真正服务的pod容器启动。这个pod的作用是什么呢？ pause容器的Dockerfile的内容很少 1234FROM scratchARG ARCHADD bin/pause-$&amp;#123;ARCH&amp;#125; /pauseENTRYPOINT [&amp;quot;/pause&amp;quot;] 可以看到，这里就启动了">
+<meta name="twitter:image" content="http://yoursite.com/2018/05/07/k8s-k8s里的pause镜像/images/80C0C662-1BB9-4FD3-A943-91ABE65E5B0B.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/07/UEFI-secure-boot/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/05/07/k8s-k8s里的pause镜像/"/>
 
 
 
@@ -129,7 +132,7 @@
   };
 </script>
 
-  <title>UEFI Secure Boot | Hexo</title>
+  <title>k8s里的pause镜像 | Hexo</title>
   
 
 
@@ -277,7 +280,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/UEFI-secure-boot/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/07/k8s-k8s里的pause镜像/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="fengbeihong">
@@ -294,7 +297,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">UEFI Secure Boot
+          <h1 class="post-title" itemprop="name headline">k8s里的pause镜像
               
             
           </h1>
@@ -319,7 +322,7 @@
                 
               
 
-              <time title="Created: 2018-01-07 07:52:51 / Modified: 18:07:01" itemprop="dateCreated datePublished" datetime="2018-01-07T07:52:51+08:00">2018-01-07</time>
+              <time title="Created: 2018-05-07 20:20:30 / Modified: 20:23:41" itemprop="dateCreated datePublished" datetime="2018-05-07T20:20:30+08:00">2018-05-07</time>
             
 
             
@@ -357,25 +360,34 @@
       
 
       
-        <p>linux的boot有一套流程：<code>firware-&gt;media-&gt;bootloader-&gt;kernel(kernel module)-&gt;init</code></p>
+        <p>在kubernetes的Pod启动时，会有一个叫做pause的容器先启动，然后才会轮到有真正服务的pod容器启动。这个pod的作用是什么呢？</p>
+<p>pause容器的Dockerfile的内容很少</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FROM scratch</span><br><span class="line">ARG ARCH</span><br><span class="line">ADD bin/pause-$&#123;ARCH&#125; /pause</span><br><span class="line">ENTRYPOINT [&quot;/pause&quot;]</span><br></pre></td></tr></table></figure>
+<p>可以看到，这里就启动了一个pause程序，再来看下pause程序</p>
+<p><a href="https://github.com/kubernetes/kubernetes/blob/master/build/pause/pause.c" target="_blank" rel="noopener">https://github.com/kubernetes/kubernetes/blob/master/build/pause/pause.c</a></p>
+<p>只看main函数里的几行代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">if (sigaction(SIGINT, &amp;(struct sigaction)&#123;.sa_handler = sigdown&#125;, NULL) &lt; 0)</span><br><span class="line">    return 1;</span><br><span class="line">if (sigaction(SIGTERM, &amp;(struct sigaction)&#123;.sa_handler = sigdown&#125;, NULL) &lt; 0)</span><br><span class="line">    return 2;</span><br><span class="line">if (sigaction(SIGCHLD, &amp;(struct sigaction)&#123;.sa_handler = sigreap,</span><br><span class="line">                                           .sa_flags = SA_NOCLDSTOP&#125;, NULL) &lt; 0)</span><br><span class="line">    return 3;</span><br><span class="line"></span><br><span class="line">for (;;)</span><br><span class="line">    pause();</span><br></pre></td></tr></table></figure>
+<p>sigaction函数指定本程序在接收到SIGINT, SIGTERM, SIGCHLD信号之后做什么处理。<br>设置完后就会通过pause()暂停本进程，一直等待信号，而信号到来后仍然继续循环等待，所以该进程只能通过接收信号后，从信号处理函数里退出了。</p>
+<p>信号处理函数就sigdown和sigreap两个函数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">static void sigdown(int signo) &#123;</span><br><span class="line">  psignal(signo, &quot;Shutting down, got signal&quot;);</span><br><span class="line">  exit(0);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static void sigreap(int signo) &#123;</span><br><span class="line">  while (waitpid(-1, NULL, WNOHANG) &gt; 0)</span><br><span class="line">    ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结合上面的代码可以看到，进程终止的信号SIGINT, SIGTERM，就是调用psignal输出了信号信息，然后就退出了。集合main函数里的逻辑，pause进程只能从这两个信号退出。</p>
+<p>SIGCHLD信号的处理比较特殊。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">while (waitpid(-1, NULL, WNOHANG) &gt; 0)</span><br><span class="line">    ;</span><br></pre></td></tr></table></figure>
+<p>这段代码，一般用父进程有多个子进程时使用，让父进程等待子进程结束。这样做可以防止产生僵尸进程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">进程可以使用fork和exec syscalls启动其他进程。当启动了其他进程，新进程的父进程就是调用fork syscall的进程。fork用于启动正在运行的进程的另一个副本，而exec则用于启动不同的进程。每个进程在OS进程表中都有一个条目。这将记录有关进程的状态和退出代码。当子进程运行完成，它的进程表条目仍然将保留直到父进程使用wait syscall检索其退出代码将其退出。这被称为“收割”僵尸进程。</span><br><span class="line">僵尸进程是已停止运行但进程表条目仍然存在的进程，因为父进程尚未通过wait syscall进行检索。从技术层面来说，终止的每个进程都算是一个僵尸进程，尽管只是在很短的时间内发生的，但只要不终止他们就可以存活更久。</span><br></pre></td></tr></table></figure>
+<p>总结下，pause进程启动后，也就干了两件事</p>
 <ul>
-<li>firmware发现可启动media，加载media（远程启动等）</li>
-<li>bootloader从boot media加载kernel到RAM里，然后启动（会根据硬盘分区表之类的发现kernel，然后继续加载kernel module之类）</li>
-<li>kernel会根据bootloader传递给kernel的指令去找到主文件系统</li>
-<li>启动文件系统中的init脚本</li>
+<li>重复循环等待信号，只有SIGTERM和SIGINT时才会退出进程</li>
+<li>负责回收僵尸子进程</li>
 </ul>
-<p>在第二步，uefi找到硬盘分区表后，发现文件系统，然后会开始加载kernel<br>如何加载，在按照系统时就已经确定好efi命令文件的路径，然后UEFI会执行这个程序<br>执行<code>efibootmgr</code>命令可以看到：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># efibootmgr -v</span><br><span class="line">BootCurrent: 0004</span><br><span class="line">Timeout: 5 seconds</span><br><span class="line">BootOrder: 0001,0004,0000,0003,0002</span><br><span class="line">Boot0000* EFI VMware Virtual IDE Hard Drive (IDE 0:0)   ACPI(a0341d0,...</span><br><span class="line">Boot0001* EFI VMware Virtual SATA CDROM Drive (1.0)     ACPI(a0341d0,...</span><br><span class="line">Boot0002* EFI Network   ACPI(a0341d0,0)PCI(12,0)MAC(000c29cf6279,0)</span><br><span class="line">Boot0003* EFI Internal Shell (Unsupported option)       MM(b,bee94000,...</span><br><span class="line">Boot0004* Red Hat Enterprise Linux    HD(spec)File(\EFI\redhat\shim.efi)</span><br></pre></td></tr></table></figure>
-<p>对于readhat来说，efi相关文件结构如下.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># tree /boot/efi</span><br><span class="line">+-- EFI</span><br><span class="line">    +-- BOOT</span><br><span class="line">    |   +-- BOOTX64.EFI</span><br><span class="line">    |   +-- fallback.efi</span><br><span class="line">    +-- redhat</span><br><span class="line">        +-- BOOT.CSV</span><br><span class="line">        +-- fonts</span><br><span class="line">        |   +-- unicode.pf2</span><br><span class="line">        +-- gcdx64.efi</span><br><span class="line">        +-- grub.cfg</span><br><span class="line">        +-- grubx64.efi</span><br><span class="line">        +-- MokManager.efi</span><br><span class="line">        +-- shim.efi</span><br><span class="line">        +-- shim-redhat.efi</span><br><span class="line"></span><br><span class="line">4 directories, 10 files</span><br></pre></td></tr></table></figure>
-<p>而当UEFI启动时，调用程序的流程是<code>UEFI-&gt;shim.efi-&gt;grubx64.efi-&gt;grub.cfg</code></p>
-<p>查看<code>shim.efi</code>里的十六进制信息，可以看到调用<code>grubx64.efi</code>的过程</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># hexdump -C /boot/efi/EFI/redhat/shim.efi | egrep -i -C 2 &apos;grub|g.r.u.b&apos;</span><br></pre></td></tr></table></figure>
-<p>接着查看<code>grubx64.efi</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># strings /boot/efi/EFI/redhat/grubx64.efi | grep grub.cfg</span><br><span class="line">%s/grub.cfg</span><br></pre></td></tr></table></figure>
-<p>到最后就到了执行grub的地方，或者叫做<code>Grand Unified Boot Loader</code><br>GRUB访问文件系统，找到kernel文件，加载到内存，然后启动kernel，传入一系列参数<br>kernel需要知道如何找到root目录，才能加载各种库和配置文件等，但是前提是要加载各种驱动后才可以做接下来的操作</p>
-<p>那么下一步就是加载<code>/lib/modules</code>下的内核模块了</p>
-<p>参考一个中文对linux boot的简介: <a href="http://blog.jobbole.com/33224/" target="_blank" rel="noopener">http://blog.jobbole.com/33224/</a></p>
+<p>在Kubernetes中，pause容器的功能会有所扩展</p>
+<ul>
+<li>pause容器在创建pod时第一个启动，创建的命名空间作为基础和pod中的其他容器共享</li>
+<li>pause容器在PID namespace中是PID为1的init进程，也是Pod中其他容器的父进程，负责回收pod内的僵尸子进程</li>
+</ul>
+<p>如果不使用pause容器呢，一个是命名空间并不好统一管理，一个是容器将会只能自己收集僵尸进程本身，这对内存会是一个隐患。</p>
+<p><img src="images/80C0C662-1BB9-4FD3-A943-91ABE65E5B0B.png" alt=""></p>
+<p>参考文章：<br><a href="https://kubernetes.io/docs/concepts/workloads/pods/pod/" target="_blank" rel="noopener">https://kubernetes.io/docs/concepts/workloads/pods/pod/</a><br><a href="http://dockone.io/article/2785" target="_blank" rel="noopener">http://dockone.io/article/2785</a><br><a href="http://dockone.io/article/2682" target="_blank" rel="noopener">http://dockone.io/article/2682</a></p>
 
       
     </div>
@@ -394,6 +406,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+        </div>
+      
 
       
       
@@ -403,8 +421,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/07/sign-kernel-module-for-secure-boot/" rel="next" title="Sign Kernel Module for Secure Boot">
-                <i class="fa fa-chevron-left"></i> Sign Kernel Module for Secure Boot
+              <a href="/2018/05/07/goim解析-数据结构/" rel="next" title="goim解析-数据结构">
+                <i class="fa fa-chevron-left"></i> goim解析-数据结构
               </a>
             
           </div>
@@ -412,10 +430,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/07/magnum-bay-create简析/" rel="prev" title="Magnum Bay Create简析">
-                Magnum Bay Create简析 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>

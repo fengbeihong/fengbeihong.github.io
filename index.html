@@ -274,6 +274,173 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/07/k8s-k8s里的pause镜像/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fengbeihong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/07/k8s-k8s里的pause镜像/" itemprop="url">
+                  k8s里的pause镜像
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-05-07 20:20:30 / Modified: 20:23:41" itemprop="dateCreated datePublished" datetime="2018-05-07T20:20:30+08:00">2018-05-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>在kubernetes的Pod启动时，会有一个叫做pause的容器先启动，然后才会轮到有真正服务的pod容器启动。这个pod的作用是什么呢？</p>
+<p>pause容器的Dockerfile的内容很少</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">FROM scratch</span><br><span class="line">ARG ARCH</span><br><span class="line">ADD bin/pause-$&#123;ARCH&#125; /pause</span><br><span class="line">ENTRYPOINT [&quot;/pause&quot;]</span><br></pre></td></tr></table></figure>
+<p>可以看到，这里就启动了一个pause程序，再来看下pause程序</p>
+<p><a href="https://github.com/kubernetes/kubernetes/blob/master/build/pause/pause.c" target="_blank" rel="noopener">https://github.com/kubernetes/kubernetes/blob/master/build/pause/pause.c</a></p>
+<p>只看main函数里的几行代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">if (sigaction(SIGINT, &amp;(struct sigaction)&#123;.sa_handler = sigdown&#125;, NULL) &lt; 0)</span><br><span class="line">    return 1;</span><br><span class="line">if (sigaction(SIGTERM, &amp;(struct sigaction)&#123;.sa_handler = sigdown&#125;, NULL) &lt; 0)</span><br><span class="line">    return 2;</span><br><span class="line">if (sigaction(SIGCHLD, &amp;(struct sigaction)&#123;.sa_handler = sigreap,</span><br><span class="line">                                           .sa_flags = SA_NOCLDSTOP&#125;, NULL) &lt; 0)</span><br><span class="line">    return 3;</span><br><span class="line"></span><br><span class="line">for (;;)</span><br><span class="line">    pause();</span><br></pre></td></tr></table></figure>
+<p>sigaction函数指定本程序在接收到SIGINT, SIGTERM, SIGCHLD信号之后做什么处理。<br>设置完后就会通过pause()暂停本进程，一直等待信号，而信号到来后仍然继续循环等待，所以该进程只能通过接收信号后，从信号处理函数里退出了。</p>
+<p>信号处理函数就sigdown和sigreap两个函数。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">static void sigdown(int signo) &#123;</span><br><span class="line">  psignal(signo, &quot;Shutting down, got signal&quot;);</span><br><span class="line">  exit(0);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">static void sigreap(int signo) &#123;</span><br><span class="line">  while (waitpid(-1, NULL, WNOHANG) &gt; 0)</span><br><span class="line">    ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>结合上面的代码可以看到，进程终止的信号SIGINT, SIGTERM，就是调用psignal输出了信号信息，然后就退出了。集合main函数里的逻辑，pause进程只能从这两个信号退出。</p>
+<p>SIGCHLD信号的处理比较特殊。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">while (waitpid(-1, NULL, WNOHANG) &gt; 0)</span><br><span class="line">    ;</span><br></pre></td></tr></table></figure>
+<p>这段代码，一般用父进程有多个子进程时使用，让父进程等待子进程结束。这样做可以防止产生僵尸进程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">进程可以使用fork和exec syscalls启动其他进程。当启动了其他进程，新进程的父进程就是调用fork syscall的进程。fork用于启动正在运行的进程的另一个副本，而exec则用于启动不同的进程。每个进程在OS进程表中都有一个条目。这将记录有关进程的状态和退出代码。当子进程运行完成，它的进程表条目仍然将保留直到父进程使用wait syscall检索其退出代码将其退出。这被称为“收割”僵尸进程。</span><br><span class="line">僵尸进程是已停止运行但进程表条目仍然存在的进程，因为父进程尚未通过wait syscall进行检索。从技术层面来说，终止的每个进程都算是一个僵尸进程，尽管只是在很短的时间内发生的，但只要不终止他们就可以存活更久。</span><br></pre></td></tr></table></figure>
+<p>总结下，pause进程启动后，也就干了两件事</p>
+<ul>
+<li>重复循环等待信号，只有SIGTERM和SIGINT时才会退出进程</li>
+<li>负责回收僵尸子进程</li>
+</ul>
+<p>在Kubernetes中，pause容器的功能会有所扩展</p>
+<ul>
+<li>pause容器在创建pod时第一个启动，创建的命名空间作为基础和pod中的其他容器共享</li>
+<li>pause容器在PID namespace中是PID为1的init进程，也是Pod中其他容器的父进程，负责回收pod内的僵尸子进程</li>
+</ul>
+<p>如果不使用pause容器呢，一个是命名空间并不好统一管理，一个是容器将会只能自己收集僵尸进程本身，这对内存会是一个隐患。</p>
+<p><img src="images/80C0C662-1BB9-4FD3-A943-91ABE65E5B0B.png" alt=""></p>
+<p>参考文章：<br><a href="https://kubernetes.io/docs/concepts/workloads/pods/pod/" target="_blank" rel="noopener">https://kubernetes.io/docs/concepts/workloads/pods/pod/</a><br><a href="http://dockone.io/article/2785" target="_blank" rel="noopener">http://dockone.io/article/2785</a><br><a href="http://dockone.io/article/2682" target="_blank" rel="noopener">http://dockone.io/article/2682</a></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/07/goim解析-数据结构/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -790,7 +957,7 @@
                 
                   <span class="post-meta-item-text">Edited on</span>
                 
-                <time title="Modified: 2018-05-07 10:36:34" itemprop="dateModified" datetime="2018-05-07T10:36:34+08:00">2018-05-07</time>
+                <time title="Modified: 2018-05-07 20:20:30" itemprop="dateModified" datetime="2018-05-07T20:20:30+08:00">2018-05-07</time>
               
             
           </span>
@@ -1745,164 +1912,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/magnum-bay-create简析/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="fengbeihong">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/07/magnum-bay-create简析/" itemprop="url">
-                  Magnum Bay Create简析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-01-07 07:52:58 / Modified: 17:55:45" itemprop="dateCreated datePublished" datetime="2018-01-07T07:52:58+08:00">2018-01-07</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>magnum组件只有magnum-api和magnum-conductor两个服务，那么入手点就简单了，请求都传递给magnum-conductor来执行了。<br>下面是magnum的源码结构，已经去掉了一些不重要的目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">magnum</span><br><span class="line">├── api # magnum-api服务的代码，http服务</span><br><span class="line">├── cmd # 命令行启动服务magnum-api、magnum-conductor或者初始化数据库，还有一个template_manage</span><br><span class="line">├── common # 通用操作</span><br><span class="line">├── conductor # magnum-conductor服务的代码</span><br><span class="line">├── db # 数据库信息</span><br><span class="line">├── drivers # 重点，执行操作都会定位到这里的代码和脚本</span><br><span class="line">├── objects # data model</span><br><span class="line">├── service # 一些额外的操作类，周期服务类等</span><br><span class="line">├── servicegroup # 同上</span><br><span class="line">├── templates # 原先放置heat模板文件的地方，后来统一改成了driver模式，就挪到了drivers目录下</span><br><span class="line">├── tests # 测试</span><br></pre></td></tr></table></figure></p>
-<p>对于<code>magnum bay-create</code>操作，主要涉及conductor和drivers这两个目录的代码，<code>templates</code>还剩下一些东西，不过最终也要弃用。</p>
-<p>drivers的目录有下面这些东西<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">drivers/</span><br><span class="line">├── common</span><br><span class="line">│   └── template_def.py # 模板定义的父类</span><br><span class="line">├── k8s_fedora_atomic_v1</span><br><span class="line">│   ├── template_def.py # 定义模板类</span><br><span class="line">│   ├── templates</span><br><span class="line">│   │   ├── elements # 创建image时可能用到的element</span><br><span class="line">│   │   ├── environments # 创建集群环境时，环境的配置</span><br><span class="line">│   │   ├── fragments # 创建集群环境时，可能要在heat模板里执行的一些脚本</span><br><span class="line">│   │   ├── kubecluster.yaml # 具体的heat template，这里是bay具体要执行哪些操作</span><br><span class="line">│   │   ├── kubemaster.yaml</span><br><span class="line">│   │   ├── kubeminion.yaml</span><br><span class="line">│   └── version.py</span><br><span class="line">├── k8s_coreos_v1</span><br><span class="line">├── mesos_ubuntu_v1</span><br><span class="line">└── swarm_fedora_atomic_v1</span><br></pre></td></tr></table></figure></p>
-<p>可以看到当前magnum支持了三种docker集群，一共四种driver</p>
-<ul>
-<li>k8s_fedora_atomic_v1</li>
-<li>k8s_coreos_v1</li>
-<li>mesos_ubuntu_v1</li>
-<li>mesos_ubuntu_v1</li>
-</ul>
-<p>要执行执行哪个driver，是有三个参数来决定的：<code>server_type</code>、<code>os</code>、<code>coe</code><br>每个driver里都会有一个<code>template_def.py</code>，这个就是来定义heat template的信息的类，类里主要做了3个操作：</p>
-<ul>
-<li>get_params # 要给heat template传递什么参数</li>
-<li>get_env_files # 要在调用heat template时如何设置环境，主要是针对是否load balance时，执行了一些heat的resource_registry操作</li>
-<li>template_path # 要执行的heat template的文件路径</li>
-</ul>
-<p>举个例子，对于<code>{&#39;server_type&#39;: &#39;bm&#39;, &#39;os&#39;: &#39;ubuntu&#39;, &#39;coe&#39;: &#39;mesos&#39;}</code>这样的参数，函数调用的堆栈信息如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">magnum/conductor/handlers/bay_conductor.py: Handler:bay-create</span><br><span class="line">magnum/conductor/handlers/bay_conductor.py: _create_stack</span><br><span class="line">magnum/conductor/handlers/bay_conductor.py: _extract_template_definition</span><br><span class="line">magnum/drivers/mesos_ubuntu_v1/template_def.py: TemplateDefinition:extract_definition</span><br><span class="line">最终调用 mesos_ubuntu_v1 对应的模板定义类 UbuntuMesosTemplateDefinition 里的三个函数</span><br></pre></td></tr></table></figure></p>
-<p>参考：<br><a href="http://docs.openstack.org/developer/magnum/userguide.html#directory-structure" target="_blank" rel="noopener">Directory structure</a><br><a href="http://docs.openstack.org/developer/magnum/userguide.html#choosing-a-coe" target="_blank" rel="noopener">Choosing a coe</a><br><a href="http://docs.openstack.org/developer/magnum/troubleshooting-guide.html" target="_blank" rel="noopener">troubleshooting-guide</a></p>
-<hr>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1950,7 +1959,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-count">15</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -1967,7 +1976,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">1</span>
+                      
+                    
+                    <span class="site-state-item-count">2</span>
                     <span class="site-state-item-name">tags</span>
                   
                 </div>

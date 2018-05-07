@@ -274,6 +274,164 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/magnum-bay-create简析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fengbeihong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/07/magnum-bay-create简析/" itemprop="url">
+                  Magnum Bay Create简析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 07:52:58 / Modified: 17:55:45" itemprop="dateCreated datePublished" datetime="2018-01-07T07:52:58+08:00">2018-01-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>magnum组件只有magnum-api和magnum-conductor两个服务，那么入手点就简单了，请求都传递给magnum-conductor来执行了。<br>下面是magnum的源码结构，已经去掉了一些不重要的目录<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">magnum</span><br><span class="line">├── api # magnum-api服务的代码，http服务</span><br><span class="line">├── cmd # 命令行启动服务magnum-api、magnum-conductor或者初始化数据库，还有一个template_manage</span><br><span class="line">├── common # 通用操作</span><br><span class="line">├── conductor # magnum-conductor服务的代码</span><br><span class="line">├── db # 数据库信息</span><br><span class="line">├── drivers # 重点，执行操作都会定位到这里的代码和脚本</span><br><span class="line">├── objects # data model</span><br><span class="line">├── service # 一些额外的操作类，周期服务类等</span><br><span class="line">├── servicegroup # 同上</span><br><span class="line">├── templates # 原先放置heat模板文件的地方，后来统一改成了driver模式，就挪到了drivers目录下</span><br><span class="line">├── tests # 测试</span><br></pre></td></tr></table></figure></p>
+<p>对于<code>magnum bay-create</code>操作，主要涉及conductor和drivers这两个目录的代码，<code>templates</code>还剩下一些东西，不过最终也要弃用。</p>
+<p>drivers的目录有下面这些东西<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">drivers/</span><br><span class="line">├── common</span><br><span class="line">│   └── template_def.py # 模板定义的父类</span><br><span class="line">├── k8s_fedora_atomic_v1</span><br><span class="line">│   ├── template_def.py # 定义模板类</span><br><span class="line">│   ├── templates</span><br><span class="line">│   │   ├── elements # 创建image时可能用到的element</span><br><span class="line">│   │   ├── environments # 创建集群环境时，环境的配置</span><br><span class="line">│   │   ├── fragments # 创建集群环境时，可能要在heat模板里执行的一些脚本</span><br><span class="line">│   │   ├── kubecluster.yaml # 具体的heat template，这里是bay具体要执行哪些操作</span><br><span class="line">│   │   ├── kubemaster.yaml</span><br><span class="line">│   │   ├── kubeminion.yaml</span><br><span class="line">│   └── version.py</span><br><span class="line">├── k8s_coreos_v1</span><br><span class="line">├── mesos_ubuntu_v1</span><br><span class="line">└── swarm_fedora_atomic_v1</span><br></pre></td></tr></table></figure></p>
+<p>可以看到当前magnum支持了三种docker集群，一共四种driver</p>
+<ul>
+<li>k8s_fedora_atomic_v1</li>
+<li>k8s_coreos_v1</li>
+<li>mesos_ubuntu_v1</li>
+<li>mesos_ubuntu_v1</li>
+</ul>
+<p>要执行执行哪个driver，是有三个参数来决定的：<code>server_type</code>、<code>os</code>、<code>coe</code><br>每个driver里都会有一个<code>template_def.py</code>，这个就是来定义heat template的信息的类，类里主要做了3个操作：</p>
+<ul>
+<li>get_params # 要给heat template传递什么参数</li>
+<li>get_env_files # 要在调用heat template时如何设置环境，主要是针对是否load balance时，执行了一些heat的resource_registry操作</li>
+<li>template_path # 要执行的heat template的文件路径</li>
+</ul>
+<p>举个例子，对于<code>{&#39;server_type&#39;: &#39;bm&#39;, &#39;os&#39;: &#39;ubuntu&#39;, &#39;coe&#39;: &#39;mesos&#39;}</code>这样的参数，函数调用的堆栈信息如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">magnum/conductor/handlers/bay_conductor.py: Handler:bay-create</span><br><span class="line">magnum/conductor/handlers/bay_conductor.py: _create_stack</span><br><span class="line">magnum/conductor/handlers/bay_conductor.py: _extract_template_definition</span><br><span class="line">magnum/drivers/mesos_ubuntu_v1/template_def.py: TemplateDefinition:extract_definition</span><br><span class="line">最终调用 mesos_ubuntu_v1 对应的模板定义类 UbuntuMesosTemplateDefinition 里的三个函数</span><br></pre></td></tr></table></figure></p>
+<p>参考：<br><a href="http://docs.openstack.org/developer/magnum/userguide.html#directory-structure" target="_blank" rel="noopener">Directory structure</a><br><a href="http://docs.openstack.org/developer/magnum/userguide.html#choosing-a-coe" target="_blank" rel="noopener">Choosing a coe</a><br><a href="http://docs.openstack.org/developer/magnum/troubleshooting-guide.html" target="_blank" rel="noopener">troubleshooting-guide</a></p>
+<hr>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/UEFI-secure-boot/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1045,7 +1203,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-count">15</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -1062,7 +1220,9 @@
                     
                       
                     
-                    <span class="site-state-item-count">1</span>
+                      
+                    
+                    <span class="site-state-item-count">2</span>
                     <span class="site-state-item-name">tags</span>
                   
                 </div>
