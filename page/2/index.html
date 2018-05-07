@@ -274,10 +274,428 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/UEFI-secure-boot/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fengbeihong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/07/UEFI-secure-boot/" itemprop="url">
+                  UEFI Secure Boot
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 07:52:51 / Modified: 18:07:01" itemprop="dateCreated datePublished" datetime="2018-01-07T07:52:51+08:00">2018-01-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>linux的boot有一套流程：<code>firware-&gt;media-&gt;bootloader-&gt;kernel(kernel module)-&gt;init</code></p>
+<ul>
+<li>firmware发现可启动media，加载media（远程启动等）</li>
+<li>bootloader从boot media加载kernel到RAM里，然后启动（会根据硬盘分区表之类的发现kernel，然后继续加载kernel module之类）</li>
+<li>kernel会根据bootloader传递给kernel的指令去找到主文件系统</li>
+<li>启动文件系统中的init脚本</li>
+</ul>
+<p>在第二步，uefi找到硬盘分区表后，发现文件系统，然后会开始加载kernel<br>如何加载，在按照系统时就已经确定好efi命令文件的路径，然后UEFI会执行这个程序<br>执行<code>efibootmgr</code>命令可以看到：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># efibootmgr -v</span><br><span class="line">BootCurrent: 0004</span><br><span class="line">Timeout: 5 seconds</span><br><span class="line">BootOrder: 0001,0004,0000,0003,0002</span><br><span class="line">Boot0000* EFI VMware Virtual IDE Hard Drive (IDE 0:0)   ACPI(a0341d0,...</span><br><span class="line">Boot0001* EFI VMware Virtual SATA CDROM Drive (1.0)     ACPI(a0341d0,...</span><br><span class="line">Boot0002* EFI Network   ACPI(a0341d0,0)PCI(12,0)MAC(000c29cf6279,0)</span><br><span class="line">Boot0003* EFI Internal Shell (Unsupported option)       MM(b,bee94000,...</span><br><span class="line">Boot0004* Red Hat Enterprise Linux    HD(spec)File(\EFI\redhat\shim.efi)</span><br></pre></td></tr></table></figure>
+<p>对于readhat来说，efi相关文件结构如下.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># tree /boot/efi</span><br><span class="line">+-- EFI</span><br><span class="line">    +-- BOOT</span><br><span class="line">    |   +-- BOOTX64.EFI</span><br><span class="line">    |   +-- fallback.efi</span><br><span class="line">    +-- redhat</span><br><span class="line">        +-- BOOT.CSV</span><br><span class="line">        +-- fonts</span><br><span class="line">        |   +-- unicode.pf2</span><br><span class="line">        +-- gcdx64.efi</span><br><span class="line">        +-- grub.cfg</span><br><span class="line">        +-- grubx64.efi</span><br><span class="line">        +-- MokManager.efi</span><br><span class="line">        +-- shim.efi</span><br><span class="line">        +-- shim-redhat.efi</span><br><span class="line"></span><br><span class="line">4 directories, 10 files</span><br></pre></td></tr></table></figure>
+<p>而当UEFI启动时，调用程序的流程是<code>UEFI-&gt;shim.efi-&gt;grubx64.efi-&gt;grub.cfg</code></p>
+<p>查看<code>shim.efi</code>里的十六进制信息，可以看到调用<code>grubx64.efi</code>的过程</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># hexdump -C /boot/efi/EFI/redhat/shim.efi | egrep -i -C 2 &apos;grub|g.r.u.b&apos;</span><br></pre></td></tr></table></figure>
+<p>接着查看<code>grubx64.efi</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># strings /boot/efi/EFI/redhat/grubx64.efi | grep grub.cfg</span><br><span class="line">%s/grub.cfg</span><br></pre></td></tr></table></figure>
+<p>到最后就到了执行grub的地方，或者叫做<code>Grand Unified Boot Loader</code><br>GRUB访问文件系统，找到kernel文件，加载到内存，然后启动kernel，传入一系列参数<br>kernel需要知道如何找到root目录，才能加载各种库和配置文件等，但是前提是要加载各种驱动后才可以做接下来的操作</p>
+<p>那么下一步就是加载<code>/lib/modules</code>下的内核模块了</p>
+<p>参考一个中文对linux boot的简介: <a href="http://blog.jobbole.com/33224/" target="_blank" rel="noopener">http://blog.jobbole.com/33224/</a></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/sign-kernel-module-for-secure-boot/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fengbeihong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/07/sign-kernel-module-for-secure-boot/" itemprop="url">
+                  Sign Kernel Module for Secure Boot
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 07:52:44 / Modified: 18:08:29" itemprop="dateCreated datePublished" datetime="2018-01-07T07:52:44+08:00">2018-01-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="安装新的nvidia驱动遇到了内核模块签名的问题"><a href="#安装新的nvidia驱动遇到了内核模块签名的问题" class="headerlink" title="安装新的nvidia驱动遇到了内核模块签名的问题"></a>安装新的nvidia驱动遇到了内核模块签名的问题</h3><p>在linux系统里安装了nvidia的CUDA，然后在支持UEFI的系统里启动会报错。<br>检查发现，系统的新安装的驱动，即新添加的一些nvidia相关的kernel module没有被sign，在secure boot启动过程中check failed。</p>
+<p>这里检查时主要有两个：一个是fedora文档，一个是nvidia文档</p>
+<ul>
+<li><p><a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/System_Administrators_Guide/sect-signing-kernel-modules-for-secure-boot.html" target="_blank" rel="noopener">fedora文档</a></p>
+</li>
+<li><p><a href="http://us.download.nvidia.com/XFree86/Linux-x86/319.12/README/installdriver.html" target="_blank" rel="noopener">nvidia文档</a></p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># sh ./NVIDIA-Linux-x86-319.12.run -s \</span><br><span class="line">--module-signing-secret-key=/path/to/signing.key \</span><br><span class="line">--module-signing-public-key=/path/to/signing.x509</span><br></pre></td></tr></table></figure>
+<p>这里有说明用nvidia的runfile加参数，runfile会自动给你签名，但是安装CUDA的时候下载的runfile报错没有这些参数</p>
+<p>顺便一说，CUDA的安装也有两种方式：rpm和runfile<br><a href="http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf" target="_blank" rel="noopener">http://developer.download.nvidia.com/compute/cuda/7.5/Prod/docs/sidebar/CUDA_Quick_Start_Guide.pdf</a></p>
+<p>在rpm方式下已经安装成功，因为rpm基本都是下载文件，然后安装文件，最后一步直接yum install cuda完成所有依赖的东西的安装</p>
+<p>runfile的话则是先要进行一些配置文件的修改，有些命令会执行失败</p>
+<hr>
+<h3 id="手动siging-kernel-module的流程"><a href="#手动siging-kernel-module的流程" class="headerlink" title="手动siging kernel module的流程"></a>手动siging kernel module的流程</h3><h4 id="需要的tools"><a href="#需要的tools" class="headerlink" title="需要的tools"></a>需要的tools</h4><ul>
+<li>openssl      openssl</li>
+<li>sign-file    kernel-devel</li>
+<li>perl         perl</li>
+<li>mokutil      mokutil</li>
+<li>keyctl       keyutils</li>
+</ul>
+<p>其中，openssl、sign-file和perl都是在build system里操作。<br>openssl用来生成密钥对，perl命令用来执行sign-file这个脚本文件，来给kernel module进行签名</p>
+<p>mokutil和keyctl是在Target system执行。<br>mokutil用来enroll the public key，就是把公钥加到<code>MOK(Machine Owner Key)</code>表里。<br>keyctl用来显示<code>system key ring</code>里的公钥</p>
+<blockquote>
+<p>在build system里，不需要UEFI Secure Boot被enabled也不需要是一个支持UEFI的系统</p>
+</blockquote>
+<h4 id="kernel-module-authentication"><a href="#kernel-module-authentication" class="headerlink" title="kernel module authentication"></a>kernel module authentication</h4><p>fedora系统中，内核模块加载后，内核模块的签名signature会用存储在内核的system key ring里的公钥进行检查，包括检查白名单和黑名单。</p>
+<p>在启动的时候，内核会从多处加载X.509 keys，加载到system key ring里，以便后面的对内核模块的check。<br>可以查看具体哪些source: <a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/System_Administrators_Guide/sect-kernel-module-authentication.html#table-sources-for-system-key-rings" target="_blank" rel="noopener">Sources For System Key Rings</a></p>
+<ul>
+<li>Embedded in kernel</li>
+<li>UEFI Secure Boot “db”</li>
+<li>UEFI Secure Boot “dbx”</li>
+<li>Embedded in shim.efi boot loader</li>
+<li>Machine Owner Key (MOK) list</li>
+</ul>
+<p>kernel本身用户无法操作，UEFI的处于机器固件层面的，不好操作，就剩下shim.efi和MOK了。</p>
+<p>在正常的系统中，shim.efi用户无法直接改动的，但在制作虚拟机镜像的时候，可以直接修改内核的所有文件，这时就可以替换或修改这个efi文件。<br>而通常情况下，比如在运行中的系统中，一般会用命令去操作MOK表，把前面步骤里生成的key注入到MOK中。</p>
+<blockquote>
+<ul>
+<li>如果uefi secure boot没有启动或系统本身就不支持uefi secure boot，那么内核只会加载keys Embedded in kernel。</li>
+<li>黑名单有更高优先级，如果存在于黑名单中了，那么就算内核模块以及签名也没用</li>
+</ul>
+</blockquote>
+<p>下面是几个显示system key ring中密钥列表的命令例子：</p>
+<p>UEFI Secure Boot is not enabled</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~]# keyctl list %:.system_keyring</span><br><span class="line">1 key in keyring:</span><br><span class="line"> 61139991: ---lswrv     0     0 asymmetric: Fedora kernel signing key: 1fc9e68f7419556348fdee2fdeb7ff9da6337b</span><br></pre></td></tr></table></figure>
+<p>UEFI Secure Boot is enabled</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">~]# keyctl list %:.system_keyring</span><br><span class="line">6 keys in keyring:</span><br><span class="line">...asymmetric: Red Hat Enterprise Linux Driver Update Program (key 3): bf57f3e87...</span><br><span class="line">...asymmetric: Red Hat Secure Boot (CA key 1): 4016841644ce3a810408050766e8f8a29...</span><br><span class="line">...asymmetric: Microsoft Corporation UEFI CA 2011: 13adbf4309bd82709c8cd54f316ed...</span><br><span class="line">...asymmetric: Microsoft Windows Production PCA 2011: a92902398e16c49778cd90f99e...</span><br><span class="line">...asymmetric: Red Hat Enterprise Linux kernel signing key: 4249689eefc77e95880b...</span><br><span class="line">...asymmetric: Red Hat Enterprise Linux kpatch signing key: 4d38fd864ebe18c5f0b7...</span><br></pre></td></tr></table></figure>
+<p>可以查看kernel console messages，查看密钥是从哪里加载进来的。示例中是搜索从efi文件加载的。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~]# dmesg | grep &apos;EFI: Loaded cert&apos;</span><br><span class="line">[5.160660] EFI: Loaded cert &apos;Microsoft Windows Production PCA 2011: a9290239...</span><br><span class="line">[5.160674] EFI: Loaded cert &apos;Microsoft Corporation UEFI CA 2011: 13adbf4309b...</span><br><span class="line">[5.165794] EFI: Loaded cert &apos;Red Hat Secure Boot (CA key 1): 4016841644ce3a8...</span><br></pre></td></tr></table></figure>
+<h4 id="kernel-module在启动过程中的规则"><a href="#kernel-module在启动过程中的规则" class="headerlink" title="kernel module在启动过程中的规则"></a>kernel module在启动过程中的规则</h4><p>kernel module在启动过程中可能被检测，因为还要依托于一个参数<code>module.sig_enforce</code>。</p>
+<p>kernel module在启动过程中的整体流程</p>
+<p>key是否强制加载，是否找到，是否验证通过，是否支持uefi secure boot，内核模块是否加载成功，内核是否被污染</p>
+<p><a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/System_Administrators_Guide/sect-kernel-module-authentication-requirements.html#table-kernel-module-authentication-requirements-for-loading" target="_blank" rel="noopener">Kernel Module Authentication Requirements for Loading</a></p>
+<h4 id="生成密钥"><a href="#生成密钥" class="headerlink" title="生成密钥"></a>生成密钥</h4><ul>
+<li>用openssl生成X.509密钥对<br>执行命令时依赖一个配置文件，要先创建一个配置文件(尖括号括起来的需要手动修改)</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">~]# cat &lt;&lt; EOF &gt; configuration_file.config</span><br><span class="line">[ req ]</span><br><span class="line">default_bits = 4096</span><br><span class="line">distinguished_name = req_distinguished_name</span><br><span class="line">prompt = no</span><br><span class="line">string_mask = utf8only</span><br><span class="line">x509_extensions = myexts</span><br><span class="line"></span><br><span class="line">[ req_distinguished_name ]</span><br><span class="line">O = &lt;Organization&gt;</span><br><span class="line">CN = &lt;Organization signing key&gt;</span><br><span class="line">emailAddress = &lt;E-mail address&gt;</span><br><span class="line"></span><br><span class="line">[ myexts ]</span><br><span class="line">basicConstraints=critical,CA:FALSE</span><br><span class="line">keyUsage=digitalSignature</span><br><span class="line">subjectKeyIdentifier=hash</span><br><span class="line">authorityKeyIdentifier=keyid</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<ul>
+<li>执行openssl命令</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~]# openssl req -x509 -new -nodes -utf8 -sha256 -days 36500 \</span><br><span class="line">&gt; -batch -config configuration_file.config -outform DER \</span><br><span class="line">&gt; -out public_key.der \</span><br><span class="line">&gt; -keyout private_key.priv</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>注意保护私钥</p>
+</blockquote>
+<h4 id="把生成的密钥加入到target-system的多种途径"><a href="#把生成的密钥加入到target-system的多种途径" class="headerlink" title="把生成的密钥加入到target system的多种途径"></a>把生成的密钥加入到target system的多种途径</h4><p>因为内核从多处加载密钥，所以也有多种方式放置密钥</p>
+<ul>
+<li><p>让服务器硬件厂商把你自己生成的密钥加入到他们自己的固件镜像的UEFI Secure Boot key database</p>
+<blockquote>
+<p>有db和dbx两种database，内核加载是会过滤掉dbx中的失效key(revoked key)</p>
+</blockquote>
+</li>
+<li><p><a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/System_Administrators_Guide/sect-executable-key-enrollment-image-adding-public-key.html" target="_blank" rel="noopener">Executable Key Enrollment Image Adding Public Key</a><br>没太理解，应该是是编辑一个已有的image</p>
+</li>
+<li><p>手动把public key加入到MOK list<br>MOK是fedora里的一个功能，The MOK facility is supported by shim.efi, MokManager.efi, grubx64.efi, and the Fedora mokutil utility.</p>
+</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]# mokutil --import my_signing_key_pub.der</span><br></pre></td></tr></table></figure>
+<p>reboot the machine</p>
+<p>MOK key enrollment的请求会被shim.efi注意到，然后它会调用MokManager.efi，从UEFI console完成密钥的登记。这时候你需要输入你刚才mokutil命令输入的密码</p>
+<blockquote>
+<p>对于ironic的user image怎么办？？，无法启动，是否会在image加载后，启动时完成enrollment??</p>
+</blockquote>
+<h4 id="Signing-Kernel-Module-with-the-Private-Key"><a href="#Signing-Kernel-Module-with-the-Private-Key" class="headerlink" title="Signing Kernel Module with the Private Key"></a>Signing Kernel Module with the Private Key</h4><ul>
+<li>编译出来module(或者其他方式生成的module)</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]# make -C /usr/src/kernels/$(uname -r) M=$PWD modules</span><br></pre></td></tr></table></figure>
+<ul>
+<li>执行perl脚本，签名</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">~]# perl /usr/src/kernels/$(uname -r)/scripts/sign-file \</span><br><span class="line">&gt; sha256 \</span><br><span class="line">&gt; my_signing_key.priv \</span><br><span class="line">&gt; my_signing_key_pub.der \</span><br><span class="line">&gt; my_module.ko</span><br></pre></td></tr></table></figure>
+<ul>
+<li>可以用modinfo来查看module的信息，<a href="https://docs.fedoraproject.org/en-US/Fedora/22/html/System_Administrators_Guide/sec-Displaying_Information_About_a_Module.html" target="_blank" rel="noopener">链接</a></li>
+</ul>
+<h4 id="加载signed-kernel-module"><a href="#加载signed-kernel-module" class="headerlink" title="加载signed kernel module"></a>加载signed kernel module</h4><ul>
+<li>首先确认系统本次启动中内核没有加载密钥，用命令来查看system keyring</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keyctl list %:.system_keyring</span><br></pre></td></tr></table></figure>
+<ul>
+<li>像之前的步骤一样，把公钥登记到MOK中，准确点叫做请求登记</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">~]# mokutil --import my_signing_key_pub.der</span><br></pre></td></tr></table></figure>
+<ul>
+<li>Reboot, and complete the enrollment at the UEFI console.</li>
+<li>重启后，再次检查keyring</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">keyctl list %:.system_keyring</span><br></pre></td></tr></table></figure>
+<ul>
+<li>现在则可以正常的加载你的kernel module了</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">~]# modprobe -v my_module</span><br><span class="line">insmod /lib/modules/3.17.4-302.fc21.x86_64/extra/my_module.ko</span><br><span class="line">~]# lsmod | grep my_module</span><br><span class="line">my_module 12425 0</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>有个疑问，这里内核模块没有签名，则该内核模块加载失败，</p>
+</blockquote>
+<h4 id="kernel-modules-and-their-utilities"><a href="#kernel-modules-and-their-utilities" class="headerlink" title="kernel modules and their utilities"></a>kernel modules and their utilities</h4><p>一些内核相关的命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">lsmod(8) — The manual page for the lsmod command.</span><br><span class="line">modinfo(8) — The manual page for the modinfo command.</span><br><span class="line">modprobe(8) — The manual page for the modprobe command.</span><br><span class="line">rmmod(8) — The manual page for the rmmod command.</span><br><span class="line">ethtool(8) — The manual page for the ethtool command.</span><br><span class="line">mii-tool(8) — The manual page for the mii-tool command.</span><br></pre></td></tr></table></figure>
+<h3 id="回到对ironic-user-image的签名"><a href="#回到对ironic-user-image的签名" class="headerlink" title="回到对ironic user image的签名"></a>回到对ironic user image的签名</h3><p>回到实际的场景，对添加了nvidia kernel module的image进行签名，有以下几种可操作的方法：</p>
+<ul>
+<li>使用自签名，那么使用命令操作MOK后，系统文件里就包含密钥了，但是需要把这个密钥最终写入到uefi主板上，这一步需要在系统启动时手动操作，所以无法自动化。</li>
+<li>使用已有签名，就是uefi主板的数据库里已经带了默认密钥，是在出厂时就写入的官方公钥。所以如果想想一个内核模块加载成功，就需要这个内核模块被官方的私钥签名，但是这个操作个人是无法做的，只能由fedora官方来做。</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/如何向openstack提交代码/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="fengbeihong">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
@@ -438,7 +856,7 @@
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/31/k8s-create/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="John Doe">
+      <meta itemprop="name" content="fengbeihong">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.gif">
     </span>
@@ -596,7 +1014,7 @@
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
-              <p class="site-author-name" itemprop="name">John Doe</p>
+              <p class="site-author-name" itemprop="name">fengbeihong</p>
               <p class="site-description motion-element" itemprop="description"></p>
           </div>
 
@@ -607,7 +1025,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">12</span>
+                    <span class="site-state-item-count">14</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -655,7 +1073,7 @@
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">John Doe</span>
+  <span class="author" itemprop="copyrightHolder">fengbeihong</span>
 
   
 
@@ -810,6 +1228,21 @@
   
 
   
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
 
   
 

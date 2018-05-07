@@ -102,24 +102,26 @@
 
 
 
-  <meta name="description" content="1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计">
+  <meta name="description" content="goim是用来搭建im系统的一套开源服务，主要包含comet、logic、router和job四个服务，然后也需要和消息队列服务kafka一起使用。 下图是四个程序启动时开启的不同协议的服务  comet是直接和客户端保持长连接的有状态服务，启动tcp和websocket服务。rpc是提供给job服务调用的。 logic是无状态服务，这里放置主要的业务逻辑。rpc服务供给comet调用。http是">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hexo">
-<meta property="og:url" content="http://yoursite.com/2017/12/31/k8s-create/index.html">
+<meta property="og:title" content="goim解析-架构图">
+<meta property="og:url" content="http://yoursite.com/2018/05/07/goim解析-架构图/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计">
+<meta property="og:description" content="goim是用来搭建im系统的一套开源服务，主要包含comet、logic、router和job四个服务，然后也需要和消息队列服务kafka一起使用。 下图是四个程序启动时开启的不同协议的服务  comet是直接和客户端保持长连接的有状态服务，启动tcp和websocket服务。rpc是提供给job服务调用的。 logic是无状态服务，这里放置主要的业务逻辑。rpc服务供给comet调用。http是">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2017-12-31T06:43:53.000Z">
+<meta property="og:image" content="http://yoursite.com/2018/05/07/goim解析-架构图/images/goim-architecture.png">
+<meta property="og:updated_time" content="2018-05-07T02:27:27.950Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
-<meta name="twitter:description" content="1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计">
+<meta name="twitter:title" content="goim解析-架构图">
+<meta name="twitter:description" content="goim是用来搭建im系统的一套开源服务，主要包含comet、logic、router和job四个服务，然后也需要和消息队列服务kafka一起使用。 下图是四个程序启动时开启的不同协议的服务  comet是直接和客户端保持长连接的有状态服务，启动tcp和websocket服务。rpc是提供给job服务调用的。 logic是无状态服务，这里放置主要的业务逻辑。rpc服务供给comet调用。http是">
+<meta name="twitter:image" content="http://yoursite.com/2018/05/07/goim解析-架构图/images/goim-architecture.png">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/12/31/k8s-create/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/05/07/goim解析-架构图/"/>
 
 
 
@@ -129,7 +131,7 @@
   };
 </script>
 
-  <title> | Hexo</title>
+  <title>goim解析-架构图 | Hexo</title>
   
 
 
@@ -277,7 +279,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/31/k8s-create/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/07/goim解析-架构图/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="fengbeihong">
@@ -294,7 +296,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">
+          <h1 class="post-title" itemprop="name headline">goim解析-架构图
               
             
           </h1>
@@ -319,7 +321,7 @@
                 
               
 
-              <time title="Created: 2017-12-31 14:43:51 / Modified: 14:43:53" itemprop="dateCreated datePublished" datetime="2017-12-31T14:43:51+08:00">2017-12-31</time>
+              <time title="Created: 2018-05-07 10:22:07 / Modified: 10:27:27" itemprop="dateCreated datePublished" datetime="2018-05-07T10:22:07+08:00">2018-05-07</time>
             
 
             
@@ -357,7 +359,15 @@
       
 
       
-        <p>1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。<br>2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。<br>3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。<br>4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计算权重。权重的计算设计到一些整体优化策略，比如replicas分配到不同主机，使用负载较低的主机等。<br>5、kube-scheduler选择权重最高的主机，进行binding操作，结果存储到etcd中。kube-scheduler会调用kube-apiserver在etcd创建boundpod对象，描述在一个工作节点上绑定运行的所有pod信息。<br>6、kubelet服务定时和etcd同步boundpod信息，发现一个新的boundpod对象没有在本节点工作，则调用Docker来创建pod。</p>
+        <p>goim是用来搭建im系统的一套开源服务，主要包含comet、logic、router和job四个服务，然后也需要和消息队列服务kafka一起使用。</p>
+<p>下图是四个程序启动时开启的不同协议的服务</p>
+<ul>
+<li>comet是直接和客户端保持长连接的有状态服务，启动tcp和websocket服务。rpc是提供给job服务调用的。</li>
+<li>logic是无状态服务，这里放置主要的业务逻辑。rpc服务供给comet调用。http是提供给其他系统模块调用，有其他业务需要给im连接用户发消息通知时，就可以调用logic的http来发送。</li>
+<li>router是用来保存状态的，主要是在部署多个comet节点时，客户端最终和哪个节点建立了长连接，这样的关联关系。rpc服务提供给logic和job调用。作为一个纯内存存取操作的服务，也可以替换成redis之类的应用。</li>
+<li>job是用来负责具体推送消息的服务。当logic的rpc被调用后，会执行一些业务逻辑，如果需要发送通知，就会把消息发送给kafka。job监听kafka，接收到kafka的消息后，job就会调用comet的rpc服务，把消息写到对应客户端的tcp连接里。</li>
+</ul>
+<p><img src="images/goim-architecture.png" alt=""></p>
 
       
     </div>
@@ -385,14 +395,18 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2018/05/05/hello-world/" rel="next" title="Hello World">
+                <i class="fa fa-chevron-left"></i> Hello World
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/01/07/如何向openstack提交代码/" rel="prev" title="如何向openstack提交代码">
-                如何向openstack提交代码 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/05/07/goim解析-数据结构/" rel="prev" title="goim解析-数据结构">
+                goim解析-数据结构 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

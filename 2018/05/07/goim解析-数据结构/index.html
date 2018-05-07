@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=6.2.0" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.2.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.2.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.2.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '6.2.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="goim中的数据结构主要存在于需要保存状态的节点，除了logic是无状态外，其他的节点comet、router、job都会有数据结构来保持信息。 cometcomet服务和客户端保持长连接，存在最多最复杂的数据结构 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505">
+<meta property="og:type" content="article">
+<meta property="og:title" content="goim解析-数据结构">
+<meta property="og:url" content="http://yoursite.com/2018/05/07/goim解析-数据结构/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="goim中的数据结构主要存在于需要保存状态的节点，除了logic是无状态外，其他的节点comet、router、job都会有数据结构来保持信息。 cometcomet服务和客户端保持长连接，存在最多最复杂的数据结构 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2018-05-07T02:32:21.173Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="goim解析-数据结构">
+<meta name="twitter:description" content="goim中的数据结构主要存在于需要保存状态的节点，除了logic是无状态外，其他的节点comet、router、job都会有数据结构来保持信息。 cometcomet服务和客户端保持长连接，存在最多最复杂的数据结构 12345678910111213141516171819202122232425262728293031323334353637383940414243444546474849505">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/05/07/goim解析-数据结构/"/>
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>goim解析-数据结构 | Hexo</title>
+  
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexo</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+    <a href="/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-home"></i> <br />Home</a>
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+    <a href="/archives/" rel="section">
+      <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />Archives</a>
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+    
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/07/goim解析-数据结构/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fengbeihong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">goim解析-数据结构
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-05-07 10:28:05 / Modified: 10:32:21" itemprop="dateCreated datePublished" datetime="2018-05-07T10:28:05+08:00">2018-05-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>goim中的数据结构主要存在于需要保存状态的节点，除了logic是无状态外，其他的节点comet、router、job都会有数据结构来保持信息。</p>
+<h3 id="comet"><a href="#comet" class="headerlink" title="comet"></a>comet</h3><p>comet服务和客户端保持长连接，存在最多最复杂的数据结构</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DefaultServer是全局变量，每启动一个comet服务就会有一个Server对象</span></span><br><span class="line"><span class="comment">// Server主要保存了多个bucket和</span></span><br><span class="line"><span class="keyword">var</span> DefaultServer    *Server</span><br><span class="line"><span class="keyword">type</span> Server <span class="keyword">struct</span> &#123;</span><br><span class="line">    Buckets   []*Bucket <span class="comment">// 一个server会有多个bucket</span></span><br><span class="line">    bucketIdx <span class="keyword">uint32</span> <span class="comment">// 其实是保存server对象中bucket的数量，方便进行hash计算索引</span></span><br><span class="line">    round     *Round <span class="comment">// 一个server会有一个round</span></span><br><span class="line">    operator  Operator</span><br><span class="line">    Options   ServerOptions <span class="comment">// options保存一些数组初始化时的数量，暂时忽略</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// --- Round ---</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// round用来保存tcp相关的读写缓冲池，定时器对象等</span></span><br><span class="line"><span class="comment">// readers,writers,timers数组的个数是在服务器启动时指定的，之后无法更改。</span></span><br><span class="line"><span class="comment">// 每次获取时会计算索引，轮询获取Pool或Timer对象，而Pool或Timer里会维护空闲链表</span></span><br><span class="line"><span class="comment">// </span></span><br><span class="line"><span class="keyword">type</span> Round <span class="keyword">struct</span> &#123;</span><br><span class="line">    readers   []bytes.Pool <span class="comment">// 读写缓冲区都使用Pool结构体，初始化时创建固定数量的Pool</span></span><br><span class="line">    writers   []bytes.Pool</span><br><span class="line">    timers    []time.Timer <span class="comment">// 定时器使用Timer作为结构体，初始化时创建固定数量的Timer</span></span><br><span class="line">    options   RoundOptions</span><br><span class="line">    readerIdx <span class="keyword">int</span> <span class="comment">// 下面3个都是代表数组的长度，也是轮询方式计算索引获取读写缓冲池或定时器对象</span></span><br><span class="line">    writerIdx <span class="keyword">int</span></span><br><span class="line">    timerIdx  <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// tcp内存缓冲池，tcp读写操作都会用到这个自定义缓冲区</span></span><br><span class="line"><span class="comment">// 具体tcp连接分配到哪个Pool，是每次递增索引，轮询方式获取</span></span><br><span class="line"><span class="keyword">type</span> Pool <span class="keyword">struct</span> &#123;</span><br><span class="line">    lock sync.Mutex</span><br><span class="line">    free *Buffer <span class="comment">// 这里放的都是空闲的Buffer，tcp连接使用时会从free链表取出Buffer，绑定成该tcp连接的用户态缓冲。tcp连接关闭，则会把Buffer放回到free链表。如果free链表没有可使用的缓冲区，就会grow，创建num个新的Buffer。</span></span><br><span class="line">    max  <span class="keyword">int</span> <span class="comment">// 每次Pool grow时，会先申请max大小字节数组，然后分配给这个num个Buffer</span></span><br><span class="line">    num  <span class="keyword">int</span> <span class="comment">// 每次Pool grow时，创建num个Buffer</span></span><br><span class="line">    size <span class="keyword">int</span> <span class="comment">// 每个Buffer的大小(字节个数)</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定时器对象，TimerData是具体定时器信息，signal是系统定时器</span></span><br><span class="line"><span class="comment">// 看实现是一个时间轮，心跳时间是 infiniteDuration = itime.Duration(1&lt;&lt;63 - 1)</span></span><br><span class="line"><span class="keyword">type</span> Timer <span class="keyword">struct</span> &#123;</span><br><span class="line">    lock   sync.Mutex</span><br><span class="line">    free   *TimerData <span class="comment">// 空闲的TimerData对象链表，操作和Pool的free链表类似</span></span><br><span class="line">    timers []*TimerData <span class="comment">// 在时间轮中等待的TimerData，每次心跳都会检查，然后调用回调</span></span><br><span class="line">    signal *itime.Timer <span class="comment">// 系统Timer对象，会对signal设置固定的定时时间，每次超时就会操作一次timers数组</span></span><br><span class="line">    num    <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定时数据</span></span><br><span class="line"><span class="keyword">type</span> TimerData <span class="keyword">struct</span> &#123;</span><br><span class="line">    Key    <span class="keyword">string</span></span><br><span class="line">    expire itime.Time <span class="comment">// 超时时间</span></span><br><span class="line">    fn     <span class="function"><span class="keyword">func</span><span class="params">()</span> // 超时回调函数</span></span><br><span class="line"><span class="function">    <span class="title">index</span>  <span class="title">int</span></span></span><br><span class="line"><span class="function">    <span class="title">next</span>   *<span class="title">TimerData</span></span></span><br><span class="line"><span class="function">&#125;</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">// --- <span class="title">Bucket</span> ---</span></span><br><span class="line"><span class="function"></span></span><br><span class="line"><span class="function">// 一个<span class="title">Bucket</span>对象保存多个<span class="title">Channel</span>，每个<span class="title">tcp</span>连接对应一个<span class="title">Channel</span>，然后根据<span class="title">hash</span>计算分配到某个<span class="title">bucket</span>上，然后这个<span class="title">tcp</span>连接的<span class="title">Channel</span>和<span class="title">bucket</span>绑定。</span></span><br><span class="line"><span class="function">// 这里涉及到<span class="title">sub</span> <span class="title">key</span>概念，一个<span class="title">tcp</span>连接对应一个<span class="title">sub</span> <span class="title">key</span>，一个用户可以有多个<span class="title">sub</span> <span class="title">key</span></span></span><br><span class="line"><span class="function"><span class="title">type</span> <span class="title">Bucket</span> <span class="title">struct</span></span> &#123;</span><br><span class="line">    cLock    sync.RWMutex        <span class="comment">// protect the channels for chs</span></span><br><span class="line">    chs      <span class="keyword">map</span>[<span class="keyword">string</span>]*Channel <span class="comment">// map sub key to a channel</span></span><br><span class="line">    boptions BucketOptions</span><br><span class="line">    rooms       <span class="keyword">map</span>[<span class="keyword">int32</span>]*Room <span class="comment">// map roomid to room</span></span><br><span class="line">    routines    []<span class="keyword">chan</span> *proto.BoardcastRoomArg <span class="comment">// room广播，包含多个chan的数组，在服务启动时就会开启同等数量的goroutine，监听chan，每次有广播请求时，会轮询计算出一个goroutine对应的chan，触发信号。</span></span><br><span class="line">    routinesNum <span class="keyword">uint64</span> <span class="comment">// 用来轮询计算索引</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 房间，一个房间可以有多个Channel</span></span><br><span class="line"><span class="keyword">type</span> Room <span class="keyword">struct</span> &#123;</span><br><span class="line">    id     <span class="keyword">int32</span></span><br><span class="line">    rLock  sync.RWMutex</span><br><span class="line">    next   *Channel <span class="comment">// 通过链表形式保存Channel地址</span></span><br><span class="line">    drop   <span class="keyword">bool</span> <span class="comment">// 表示该room是否所有Channel都退出了</span></span><br><span class="line">    Online <span class="keyword">int</span> <span class="comment">// dirty read is ok</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Channel对应一个TCP连接，关联着读写缓冲区，以及一个tcp连接的数据队列Ring</span></span><br><span class="line"><span class="comment">// 用户态缓冲区主要用来处理封包粘包问题</span></span><br><span class="line"><span class="comment">// Channel used by message pusher send msg to write goroutine.</span></span><br><span class="line"><span class="keyword">type</span> Channel <span class="keyword">struct</span> &#123;</span><br><span class="line">    RoomId   <span class="keyword">int32</span></span><br><span class="line">    CliProto Ring <span class="comment">// 和Ring名称一样，是一个环形数据结构，保存着一组客户端tcp发送来的数据。</span></span><br><span class="line">    signal   <span class="keyword">chan</span> *proto.Proto <span class="comment">// 通过signal这个chan来向tcp连接写数据</span></span><br><span class="line">    Writer   bufio.Writer <span class="comment">// 缓冲区，当TCP连接到来，Channel创建时，从Round中获取用户态缓冲区</span></span><br><span class="line">    Reader   bufio.Reader <span class="comment">// 缓冲区，同上</span></span><br><span class="line">    Next     *Channel <span class="comment">// 双向链表</span></span><br><span class="line">    Prev     *Channel</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 环形数据结构，保存着一组proto.Proto，也就是按照二进制协议解析完成后的对象，这个数组的数量是固定的。</span></span><br><span class="line"><span class="comment">// Ring.data的数组元素个数固定，如果某次写入不进去，就会阻塞，不会增加Ring.data的大小</span></span><br><span class="line"><span class="keyword">type</span> Ring <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// read</span></span><br><span class="line">    rp   <span class="keyword">uint64</span></span><br><span class="line">    num  <span class="keyword">uint64</span></span><br><span class="line">    mask <span class="keyword">uint64</span></span><br><span class="line">    <span class="comment">// TODO split cacheline, many cpu cache line size is 64</span></span><br><span class="line">    <span class="comment">// pad [40]byte</span></span><br><span class="line">    <span class="comment">// write</span></span><br><span class="line">    wp   <span class="keyword">uint64</span></span><br><span class="line">    data []proto.Proto</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="router"><a href="#router" class="headerlink" title="router"></a>router</h3><p>router是goim里专门负责保存数据的服务，对其他节点提供了rpc调用，主要被logic和job调用。这个服务也可以被redis等替代，因为基本就是在读写一些内存数据，没有额外逻辑。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// router也有一个bucket结构体，不过和comet的bucket保存的信息不同，这里主要保存用户、tcp连接、房间等对象的关联信息。</span></span><br><span class="line"><span class="keyword">type</span> Bucket <span class="keyword">struct</span> &#123;</span><br><span class="line">    bLock             sync.RWMutex</span><br><span class="line">    server            <span class="keyword">int</span>                       <span class="comment">// session server map init num</span></span><br><span class="line">    session           <span class="keyword">int</span>                       <span class="comment">// bucket session init num</span></span><br><span class="line">    sessions          <span class="keyword">map</span>[<span class="keyword">int64</span>]*Session        <span class="comment">// userid-&gt;sessions，一个用户一个session</span></span><br><span class="line">    roomCounter       <span class="keyword">map</span>[<span class="keyword">int32</span>]<span class="keyword">int32</span>           <span class="comment">// roomid-&gt;count，某个room里的channel总数量</span></span><br><span class="line">    serverCounter     <span class="keyword">map</span>[<span class="keyword">int32</span>]<span class="keyword">int32</span>           <span class="comment">// server-&gt;count，某个server里的channel总数量，这个server指的是某个具体的comet节点的server id</span></span><br><span class="line">    userServerCounter <span class="keyword">map</span>[<span class="keyword">int32</span>]<span class="keyword">map</span>[<span class="keyword">int64</span>]<span class="keyword">int32</span> <span class="comment">// serverid-&gt;userid-&gt;count，某个server里的某个用户的channel总数</span></span><br><span class="line">    cleaner           *Cleaner                  <span class="comment">// bucket map cleaner</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 一个用户对应一个session</span></span><br><span class="line"><span class="keyword">type</span> Session <span class="keyword">struct</span> &#123;</span><br><span class="line">    seq     <span class="keyword">int32</span> <span class="comment">// seq代表一个用户的新的连接的序列号，从1开始，不断递增，userid+seq就是subkey</span></span><br><span class="line">    servers <span class="keyword">map</span>[<span class="keyword">int32</span>]<span class="keyword">int32</span>           <span class="comment">// seq:server，保存某个连接在哪个comet节点上这样的关联关系，因为需要知道这个关联关系，才可以发送通知时，找到具体的comet节点，然后进行tcp写操作</span></span><br><span class="line">    rooms   <span class="keyword">map</span>[<span class="keyword">int32</span>]<span class="keyword">map</span>[<span class="keyword">int32</span>]<span class="keyword">int32</span> <span class="comment">// roomid:seq:server with specified room id，一个用户所在的房间信息</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="job"><a href="#job" class="headerlink" title="job"></a>job</h3><p>job服务主要工作就是连接上kafka，接收kafka的消息，然后job调用comet的rpc服务，comet则把请求消息写入到tcp连接，客户端则会接收到通知消息。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// job服务主要工作就是从router上同步channel和commet节点的关联关系，然后当从kafka收到发送通知的请求时，就要调用指定comet节点的rpc服务，进行对应tcp写操作。</span></span><br><span class="line"><span class="comment">// 下面的多个routines都是数组，数组个数相同，job服务启动时会启动这个个数的goroutine，用来接收到kafka消息时，通过chan触发job调用comet的rpc服务的操作</span></span><br><span class="line"><span class="keyword">type</span> Comet <span class="keyword">struct</span> &#123;</span><br><span class="line">    serverId             <span class="keyword">int32</span></span><br><span class="line">    rpcClient            *xrpc.Clients</span><br><span class="line">    pushRoutines         []<span class="keyword">chan</span> *proto.MPushMsgArg <span class="comment">// 数组，每个元素又是一个chan链表</span></span><br><span class="line">    broadcastRoutines    []<span class="keyword">chan</span> *proto.BoardcastArg <span class="comment">// 同上</span></span><br><span class="line">    roomRoutines         []<span class="keyword">chan</span> *proto.BoardcastRoomArg <span class="comment">// 同上</span></span><br><span class="line">    pushRoutinesNum      <span class="keyword">int64</span></span><br><span class="line">    roomRoutinesNum      <span class="keyword">int64</span></span><br><span class="line">    broadcastRoutinesNum <span class="keyword">int64</span></span><br><span class="line">    options              CometOptions</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这个结构体用来定时从router获取信息，更新当前goim系统里的客户端连接服务端的状态</span></span><br><span class="line"><span class="keyword">type</span> RoomBucket <span class="keyword">struct</span> &#123;</span><br><span class="line">    roomNum <span class="keyword">int</span></span><br><span class="line">    rooms   <span class="keyword">map</span>[<span class="keyword">int32</span>]*Room</span><br><span class="line">    rwLock  sync.RWMutex</span><br><span class="line">    options RoomOptions</span><br><span class="line">    round   *Round</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 定时器，不再赘述</span></span><br><span class="line"><span class="comment">// Ronnd userd for connection round-robin get a timer for split big lock.</span></span><br><span class="line"><span class="keyword">type</span> Round <span class="keyword">struct</span> &#123;</span><br><span class="line">    timers   []time.Timer</span><br><span class="line">    options  RoundOptions</span><br><span class="line">    timerIdx <span class="keyword">int</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/05/07/goim解析-架构图/" rel="next" title="goim解析-架构图">
+                <i class="fa fa-chevron-left"></i> goim解析-架构图
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">fengbeihong</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">14</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#comet"><span class="nav-number">1.</span> <span class="nav-text">comet</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#router"><span class="nav-number">2.</span> <span class="nav-text">router</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#job"><span class="nav-number">3.</span> <span class="nav-text">job</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">fengbeihong</span>
+
+  
+
+  
+</div>
+
+
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> v3.7.1</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/theme-next/hexo-theme-next">NexT.Muse</a> v6.2.0</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.2.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.2.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.2.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.2.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.2.0"></script>
+
+
+
+  
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
