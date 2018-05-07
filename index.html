@@ -727,6 +727,158 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/k8s-create/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fengbeihong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/07/k8s-create/" itemprop="url">
+                  kubernetes pod create流程
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 15:52:58" itemprop="dateCreated datePublished" datetime="2018-01-07T15:52:58+08:00">2018-01-07</time>
+            
+
+            
+              
+
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2018-05-07 10:36:34" itemprop="dateModified" datetime="2018-05-07T10:36:34+08:00">2018-05-07</time>
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。<br>2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。<br>3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。<br>4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计算权重。权重的计算设计到一些整体优化策略，比如replicas分配到不同主机，使用负载较低的主机等。<br>5、kube-scheduler选择权重最高的主机，进行binding操作，结果存储到etcd中。kube-scheduler会调用kube-apiserver在etcd创建boundpod对象，描述在一个工作节点上绑定运行的所有pod信息。<br>6、kubelet服务定时和etcd同步boundpod信息，发现一个新的boundpod对象没有在本节点工作，则调用Docker来创建pod。</p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/swift的相关问题/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1713,164 +1865,6 @@
 <p>举个例子，对于<code>{&#39;server_type&#39;: &#39;bm&#39;, &#39;os&#39;: &#39;ubuntu&#39;, &#39;coe&#39;: &#39;mesos&#39;}</code>这样的参数，函数调用的堆栈信息如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">magnum/conductor/handlers/bay_conductor.py: Handler:bay-create</span><br><span class="line">magnum/conductor/handlers/bay_conductor.py: _create_stack</span><br><span class="line">magnum/conductor/handlers/bay_conductor.py: _extract_template_definition</span><br><span class="line">magnum/drivers/mesos_ubuntu_v1/template_def.py: TemplateDefinition:extract_definition</span><br><span class="line">最终调用 mesos_ubuntu_v1 对应的模板定义类 UbuntuMesosTemplateDefinition 里的三个函数</span><br></pre></td></tr></table></figure></p>
 <p>参考：<br><a href="http://docs.openstack.org/developer/magnum/userguide.html#directory-structure" target="_blank" rel="noopener">Directory structure</a><br><a href="http://docs.openstack.org/developer/magnum/userguide.html#choosing-a-coe" target="_blank" rel="noopener">Choosing a coe</a><br><a href="http://docs.openstack.org/developer/magnum/troubleshooting-guide.html" target="_blank" rel="noopener">troubleshooting-guide</a></p>
 <hr>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/UEFI-secure-boot/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="fengbeihong">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/07/UEFI-secure-boot/" itemprop="url">
-                  UEFI Secure Boot
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-01-07 07:52:51 / Modified: 18:07:01" itemprop="dateCreated datePublished" datetime="2018-01-07T07:52:51+08:00">2018-01-07</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>linux的boot有一套流程：<code>firware-&gt;media-&gt;bootloader-&gt;kernel(kernel module)-&gt;init</code></p>
-<ul>
-<li>firmware发现可启动media，加载media（远程启动等）</li>
-<li>bootloader从boot media加载kernel到RAM里，然后启动（会根据硬盘分区表之类的发现kernel，然后继续加载kernel module之类）</li>
-<li>kernel会根据bootloader传递给kernel的指令去找到主文件系统</li>
-<li>启动文件系统中的init脚本</li>
-</ul>
-<p>在第二步，uefi找到硬盘分区表后，发现文件系统，然后会开始加载kernel<br>如何加载，在按照系统时就已经确定好efi命令文件的路径，然后UEFI会执行这个程序<br>执行<code>efibootmgr</code>命令可以看到：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># efibootmgr -v</span><br><span class="line">BootCurrent: 0004</span><br><span class="line">Timeout: 5 seconds</span><br><span class="line">BootOrder: 0001,0004,0000,0003,0002</span><br><span class="line">Boot0000* EFI VMware Virtual IDE Hard Drive (IDE 0:0)   ACPI(a0341d0,...</span><br><span class="line">Boot0001* EFI VMware Virtual SATA CDROM Drive (1.0)     ACPI(a0341d0,...</span><br><span class="line">Boot0002* EFI Network   ACPI(a0341d0,0)PCI(12,0)MAC(000c29cf6279,0)</span><br><span class="line">Boot0003* EFI Internal Shell (Unsupported option)       MM(b,bee94000,...</span><br><span class="line">Boot0004* Red Hat Enterprise Linux    HD(spec)File(\EFI\redhat\shim.efi)</span><br></pre></td></tr></table></figure>
-<p>对于readhat来说，efi相关文件结构如下.</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"># tree /boot/efi</span><br><span class="line">+-- EFI</span><br><span class="line">    +-- BOOT</span><br><span class="line">    |   +-- BOOTX64.EFI</span><br><span class="line">    |   +-- fallback.efi</span><br><span class="line">    +-- redhat</span><br><span class="line">        +-- BOOT.CSV</span><br><span class="line">        +-- fonts</span><br><span class="line">        |   +-- unicode.pf2</span><br><span class="line">        +-- gcdx64.efi</span><br><span class="line">        +-- grub.cfg</span><br><span class="line">        +-- grubx64.efi</span><br><span class="line">        +-- MokManager.efi</span><br><span class="line">        +-- shim.efi</span><br><span class="line">        +-- shim-redhat.efi</span><br><span class="line"></span><br><span class="line">4 directories, 10 files</span><br></pre></td></tr></table></figure>
-<p>而当UEFI启动时，调用程序的流程是<code>UEFI-&gt;shim.efi-&gt;grubx64.efi-&gt;grub.cfg</code></p>
-<p>查看<code>shim.efi</code>里的十六进制信息，可以看到调用<code>grubx64.efi</code>的过程</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"># hexdump -C /boot/efi/EFI/redhat/shim.efi | egrep -i -C 2 &apos;grub|g.r.u.b&apos;</span><br></pre></td></tr></table></figure>
-<p>接着查看<code>grubx64.efi</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># strings /boot/efi/EFI/redhat/grubx64.efi | grep grub.cfg</span><br><span class="line">%s/grub.cfg</span><br></pre></td></tr></table></figure>
-<p>到最后就到了执行grub的地方，或者叫做<code>Grand Unified Boot Loader</code><br>GRUB访问文件系统，找到kernel文件，加载到内存，然后启动kernel，传入一系列参数<br>kernel需要知道如何找到root目录，才能加载各种库和配置文件等，但是前提是要加载各种驱动后才可以做接下来的操作</p>
-<p>那么下一步就是加载<code>/lib/modules</code>下的内核模块了</p>
-<p>参考一个中文对linux boot的简介: <a href="http://blog.jobbole.com/33224/" target="_blank" rel="noopener">http://blog.jobbole.com/33224/</a></p>
 
           
         
