@@ -274,6 +274,161 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/bash-shell-tips/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fengbeihong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fengbeihong">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/07/bash-shell-tips/" itemprop="url">
+                  Bash Shell Tips
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 07:56:15 / Modified: 17:57:41" itemprop="dateCreated datePublished" datetime="2018-01-07T07:56:15+08:00">2018-01-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>对企业级产品里的脚本中常用shell做个记录，平时不写shell很少注意到。</p>
+<h2 id="set"><a href="#set" class="headerlink" title="set"></a>set</h2><p>控制环境变量<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set -o errexit -o nounset -o pipefail</span><br></pre></td></tr></table></figure></p>
+<h2 id="shift"><a href="#shift" class="headerlink" title="shift"></a>shift</h2><p>用来修改参数数组<code>$@</code><br>假设执行shell命令<code>bash test.sh 1 2 3 4 5</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">echo $@  # 1 2 3 4 5</span><br><span class="line"></span><br><span class="line">shift</span><br><span class="line"># 等同于shift 1</span><br><span class="line">echo $@  # 2 3 4 5</span><br><span class="line"></span><br><span class="line">shift</span><br><span class="line">echo $@  # 3 4 5</span><br><span class="line"></span><br><span class="line">shift 2</span><br><span class="line">echo $@  # 5</span><br></pre></td></tr></table></figure></p>
+<p>可以看到shift可以加参数也可以不加，加参数就是从当前参数数组的第几个参数开始截断</p>
+<h2 id="0"><a href="#0" class="headerlink" title="$? $0 $@"></a>$? $0 $@</h2><p>返回值，参数，默认值等等<br>${4:-$COMMAND}</p>
+<h2 id="declare"><a href="#declare" class="headerlink" title="declare"></a>declare</h2><p>声明参数<br>尤其是声明全局参数</p>
+<h2 id="if"><a href="#if" class="headerlink" title="if"></a>if</h2><p>判断表达式的用法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">if [ -d /test_dir/ ]; then</span><br><span class="line">    # 检测目录是否存在</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">if [ -f /test_file ]; then</span><br><span class="line">    # 检测文件是否存在</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">if [ -z $TEST_VAL ]; then</span><br><span class="line">    # 如果变量为空</span><br><span class="line">fi</span><br></pre></td></tr></table></figure></p>
+<p>比较两个浮点型变量<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$s1=10</span><br><span class="line">$s2=9</span><br><span class="line"></span><br><span class="line">echo $s1&apos;&gt;&apos;$s2 | bc -l</span><br><span class="line">0</span><br><span class="line">echo $s2&apos;&gt;&apos;$s1 | bc -l</span><br><span class="line">1</span><br><span class="line"></span><br><span class="line">$s1=10</span><br><span class="line">$s2=10</span><br><span class="line"></span><br><span class="line">echo $s1&apos;&gt;&apos;$s2 | bc -l</span><br><span class="line">0</span><br><span class="line">echo $s2&apos;&gt;&apos;$s1 | bc -l</span><br><span class="line">0</span><br></pre></td></tr></table></figure></p>
+<h2 id="trap"><a href="#trap" class="headerlink" title="trap"></a>trap</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">trap - INT</span><br></pre></td></tr></table></figure>
+<h2 id="tr"><a href="#tr" class="headerlink" title="tr"></a>tr</h2><p><code>tr</code></p>
+<h2 id="cut"><a href="#cut" class="headerlink" title="cut"></a>cut</h2><p><code>cut</code></p>
+<h2 id="cat"><a href="#cat" class="headerlink" title="cat"></a>cat</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOM</span><br><span class="line">EOM</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+<h2 id="local"><a href="#local" class="headerlink" title="local"></a>local</h2><p><code>local</code></p>
+<h2 id="echo-e"><a href="#echo-e" class="headerlink" title="echo -e"></a>echo -e</h2><p><code>echo -e</code></p>
+<h2 id="case-esac"><a href="#case-esac" class="headerlink" title="case esac"></a>case esac</h2><p><code>case esac</code></p>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/solum简介/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1620,7 +1775,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-count">18</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>

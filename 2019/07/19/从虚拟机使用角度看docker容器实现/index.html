@@ -102,24 +102,29 @@
 
 
 
-  <meta name="description" content="swagger-ui的使用 首先有个swagger-ui这个项目，可以根据swagger.json文件的内容，以一种非常漂亮的页面风格显示api信息。 可以直接下载swagger-ui的项目代码，在dist目录下有已经用npm编译好的html页面，直接打开index.html就可以看到。 在地址栏里会是一个默认的值http://petstore.swagger.io/v2/swagger.json">
+  <meta name="description" content="本文旨在从虚拟机使用的角度对照着理解docker容器的实现。容器化技术也是属于虚拟化的一种，虚拟机的虚拟化不管技术如何实现，使用者角度体验都是类似。 namespace和cgroupsnamespace的隔离机制是虚拟化的基础，Linux在chroot的基础上提供了对UTS、IPC、mount、PID、network、User等隔离机制。而cgroups在隔离的基础上，提供了资源的限制和控制功能。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="如何使用swagger整合api">
-<meta property="og:url" content="http://yoursite.com/2018/01/17/如何使用swagger整合api/index.html">
+<meta property="og:title" content="从虚拟机使用角度看docker容器实现">
+<meta property="og:url" content="http://yoursite.com/2019/07/19/从虚拟机使用角度看docker容器实现/index.html">
 <meta property="og:site_name" content="fengbeihong">
-<meta property="og:description" content="swagger-ui的使用 首先有个swagger-ui这个项目，可以根据swagger.json文件的内容，以一种非常漂亮的页面风格显示api信息。 可以直接下载swagger-ui的项目代码，在dist目录下有已经用npm编译好的html页面，直接打开index.html就可以看到。 在地址栏里会是一个默认的值http://petstore.swagger.io/v2/swagger.json">
+<meta property="og:description" content="本文旨在从虚拟机使用的角度对照着理解docker容器的实现。容器化技术也是属于虚拟化的一种，虚拟机的虚拟化不管技术如何实现，使用者角度体验都是类似。 namespace和cgroupsnamespace的隔离机制是虚拟化的基础，Linux在chroot的基础上提供了对UTS、IPC、mount、PID、network、User等隔离机制。而cgroups在隔离的基础上，提供了资源的限制和控制功能。">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-01-17T02:37:19.000Z">
+<meta property="og:image" content="http://yoursite.com/2019/07/19/从虚拟机使用角度看docker容器实现/images/1563537073737.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/07/19/从虚拟机使用角度看docker容器实现/images/1563537213621.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/07/19/从虚拟机使用角度看docker容器实现/images/1563537385477.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/07/19/从虚拟机使用角度看docker容器实现/images/1563537478197.jpg">
+<meta property="og:updated_time" content="2019-07-19T12:00:07.052Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="如何使用swagger整合api">
-<meta name="twitter:description" content="swagger-ui的使用 首先有个swagger-ui这个项目，可以根据swagger.json文件的内容，以一种非常漂亮的页面风格显示api信息。 可以直接下载swagger-ui的项目代码，在dist目录下有已经用npm编译好的html页面，直接打开index.html就可以看到。 在地址栏里会是一个默认的值http://petstore.swagger.io/v2/swagger.json">
+<meta name="twitter:title" content="从虚拟机使用角度看docker容器实现">
+<meta name="twitter:description" content="本文旨在从虚拟机使用的角度对照着理解docker容器的实现。容器化技术也是属于虚拟化的一种，虚拟机的虚拟化不管技术如何实现，使用者角度体验都是类似。 namespace和cgroupsnamespace的隔离机制是虚拟化的基础，Linux在chroot的基础上提供了对UTS、IPC、mount、PID、network、User等隔离机制。而cgroups在隔离的基础上，提供了资源的限制和控制功能。">
+<meta name="twitter:image" content="http://yoursite.com/2019/07/19/从虚拟机使用角度看docker容器实现/images/1563537073737.jpg">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/17/如何使用swagger整合api/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/07/19/从虚拟机使用角度看docker容器实现/"/>
 
 
 
@@ -129,7 +134,7 @@
   };
 </script>
 
-  <title>如何使用swagger整合api | fengbeihong</title>
+  <title>从虚拟机使用角度看docker容器实现 | fengbeihong</title>
   
 
 
@@ -277,7 +282,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/17/如何使用swagger整合api/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/19/从虚拟机使用角度看docker容器实现/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="fengbeihong">
@@ -294,7 +299,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">如何使用swagger整合api
+          <h1 class="post-title" itemprop="name headline">从虚拟机使用角度看docker容器实现
               
             
           </h1>
@@ -319,7 +324,7 @@
                 
               
 
-              <time title="Created: 2018-01-17 02:36:59 / Modified: 10:37:19" itemprop="dateCreated datePublished" datetime="2018-01-17T02:36:59+08:00">2018-01-17</time>
+              <time title="Created: 2019-07-19 19:48:01 / Modified: 20:00:07" itemprop="dateCreated datePublished" datetime="2019-07-19T19:48:01+08:00">2019-07-19</time>
             
 
             
@@ -357,26 +362,35 @@
       
 
       
-        <h2 id="swagger-ui的使用"><a href="#swagger-ui的使用" class="headerlink" title="swagger-ui的使用"></a>swagger-ui的使用</h2><ul>
-<li>首先有个swagger-ui这个项目，可以根据<code>swagger.json</code>文件的内容，以一种非常漂亮的页面风格显示api信息。</li>
-<li>可以直接下载swagger-ui的项目代码，在<code>dist</code>目录下有已经用npm编译好的html页面，直接打开<code>index.html</code>就可以看到。</li>
-<li>在地址栏里会是一个默认的值<code>http://petstore.swagger.io/v2/swagger.json</code>，这个值是获取的一个server下的某个路径下的<code>swagger.json</code>文件，所以如果你想自己编写一个<code>swagger.json</code>文件，也必须放在一个服务下跑，才可以正常显示api。</li>
-</ul>
-<h2 id="如何编写swagger-json"><a href="#如何编写swagger-json" class="headerlink" title="如何编写swagger.json"></a>如何编写swagger.json</h2><ul>
-<li><code>swagger.json</code>有自己的格式，我们写代码时不可能写一个api就修改下<code>swagger.json</code>文件，所以需要一种自动生成<code>swagger.json</code>的工具。</li>
-<li>一般是借鉴其他语言里的形式，在函数上以特殊规则编写注释，这样就可以使用工具统一生成<code>swagger.json</code>文件</li>
-<li>最早注释的形式是在beego里自动集成的，后来<code>https://github.com/yvasiyarov/swagger</code>借鉴beego编写了一个工具，根据注释可以生成各种格式的文档，再后来vmware赞助了一个项目<code>https://github.com/go-swagger/go-swagger</code>，就是借鉴了yvasiyarov的思路，功能更加完善。</li>
-</ul>
-<h2 id="如何使用go-swagger"><a href="#如何使用go-swagger" class="headerlink" title="如何使用go-swagger"></a>如何使用go-swagger</h2><p>假设已经有一些编写好的go代码文件，直接在目录下执行<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger generate spec -o ./swagger.json</span><br></pre></td></tr></table></figure></p>
-<p>有了<code>swagger.json</code>文件之后，可以放到项目里保存。如果想查看api信息，可以执行以下命令启动服务。</p>
+        <p>本文旨在从虚拟机使用的角度对照着理解docker容器的实现。<br>容器化技术也是属于虚拟化的一种，虚拟机的虚拟化不管技术如何实现，使用者角度体验都是类似。</p>
+<h4 id="namespace和cgroups"><a href="#namespace和cgroups" class="headerlink" title="namespace和cgroups"></a>namespace和cgroups</h4><p>namespace的隔离机制是虚拟化的基础，Linux在chroot的基础上提供了对UTS、IPC、mount、PID、network、User等隔离机制。而cgroups在隔离的基础上，提供了资源的限制和控制功能。<br>这些基础技术的文章已经有很多，推荐看下左耳朵耗子的，本文只希望从稍微大点的层面把这些概念串起来。</p>
+<hr>
+<p>当我们希望虚拟出一个貌似独立的操作系统环境时，都需要哪方面的虚拟化，以及在容器里如何实现的？</p>
+<p><img src="images/1563537073737.jpg" alt=""></p>
+<h5 id="独立的用户系统"><a href="#独立的用户系统" class="headerlink" title="独立的用户系统"></a>独立的用户系统</h5><p>登录该操作系统需要一个用户，那么不管是root还是非root，都需要一套独立的用户系统。<br>User namespace可以提供该功能，容器内的用户和外部不会冲突。</p>
+<h5 id="独立的主机名"><a href="#独立的主机名" class="headerlink" title="独立的主机名"></a>独立的主机名</h5><p>UTS namespace可以提供该隔离功能。</p>
+<h5 id="独立的进程树"><a href="#独立的进程树" class="headerlink" title="独立的进程树"></a>独立的进程树</h5><p>PID namespace可以提供该隔离功能。</p>
+<h5 id="IPC通信"><a href="#IPC通信" class="headerlink" title="IPC通信"></a>IPC通信</h5><p>IPC namespace可以提供该隔离功能。</p>
+<h5 id="独立的文件系统，可以从镜像启动"><a href="#独立的文件系统，可以从镜像启动" class="headerlink" title="独立的文件系统，可以从镜像启动"></a>独立的文件系统，可以从镜像启动</h5><p>典型的Linux文件系统由bootfs和rootfs组成，bootfs(boot file system)主要包含 bootloader和kernel，bootloader主要是引导加载kernel，当kernel被加载到内存中后 bootfs就被umount了。rootfs (root file system) 包含的就是典型 Linux 系统中的/dev，/proc，/bin，/etc等标准目录和文件。</p>
+<p>Mount namespace可以提供该隔离功能（类似于chroot命令），而在docker里用这个功能挂载rootfs，并且和AUFS(也可以是其他的Union 文件系统)一起使用。各种容器里运行的进程不一定需要这么多系统目录，在docker里把原本linux文件系统里的rootfs分为多份，使用AUFS的union mount技术一层一层组合起来，组成read only层，最上层则有write权限，可以由容器中允许的进程修改。</p>
+<p>linux镜像的内容和其文件系统一致，有bootfs和rootfs，而docker有自己的启动方式，所以上面的readonly层和readwrite层组合起来就是最终的docker镜像。</p>
+<p><img src="images/1563537213621.jpg" alt=""></p>
+<h5 id="独立的网络"><a href="#独立的网络" class="headerlink" title="独立的网络"></a>独立的网络</h5><p>和宿主机隔离开，有自己的网络设备和网段。</p>
+<p>Network namespace可以提供该隔离功能，网络设备在两个namespace之间是互相看不到的。但也只是隔离，虚拟机中的网络设备模拟正常的linux系统，有许多默认的比如lo设备，还有自己的网卡设备，docker都可以模拟出来。</p>
+<p>docker有多种网络模式，这里只用下图说明下bridge网络模式。</p>
+<p>docker的namespace内创建一个网卡设备,宿主机创建一个bridge设备，通过veth pair讲两者连接起来，则成功将两个network namespace的设备连通。</p>
+<p><img src="images/1563537385477.jpg" alt=""></p>
+<h5 id="网络也有自己的安全机制，可以控制数据的进出"><a href="#网络也有自己的安全机制，可以控制数据的进出" class="headerlink" title="网络也有自己的安全机制，可以控制数据的进出"></a>网络也有自己的安全机制，可以控制数据的进出</h5><p>有了上面的模拟网络的基础，则可以通过宿主机的iptables来控制网络数据。</p>
+<h5 id="资源限制"><a href="#资源限制" class="headerlink" title="资源限制"></a>资源限制</h5><p>上述隔离算是对环境的隔离，以及对linux环境的模拟，在实际使用中还要有对资源的隔离，这时cgroups派上用场，可以对CPU、memory等资源的使用加以限制或控制。</p>
+<hr>
+<p>上面讲了可以用来做容器虚拟化的各种系统功能，但是这一切功能在具体实现中都需要一个起点，这个起点就是开启一个新的进程。</p>
+<p>各种namespace的使用在具体代码实现中，都是fork一个新的进程过程中，使用不同的系统调用或选项参数组合，来决定这个新的进程进行哪些环境的隔离。比如说network namespace，可以控制容器启动时可以和宿主机处于同一个network namespace下，这种就是docker的host网络模式，可以宿主机直连。</p>
+<p>启动的新进程在docker容器里就是dockerinit进程，该进程做一些初始化工作，使用cgroups对资源使用做限制，或者创建容器的network namespace下的网络设备等等，最后则会执行entrypoint或者用户定义的CMD应用程序（Dockerfile中的CMD）。</p>
+<p>如下图，所有的这些工作都是在同一个进程下进行的，一般情况下，一个容器就是一个进程。</p>
+<p><img src="images/1563537478197.jpg" alt=""></p>
 <blockquote>
-<p>参照openshift项目，只保存json文件就可以。如果想在web服务的指定端口直接可以访问API文档，那另说</p>
+<p>参考文章<br>《Docker源码分析》<br><a href="https://coolshell.cn/articles/17010.html" target="_blank" rel="noopener">https://coolshell.cn/articles/17010.html</a><br><a href="https://coolshell.cn/articles/17029.html" target="_blank" rel="noopener">https://coolshell.cn/articles/17029.html</a><br><a href="https://coolshell.cn/articles/17049.html" target="_blank" rel="noopener">https://coolshell.cn/articles/17049.html</a></p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">swagger serve swagger.json</span><br></pre></td></tr></table></figure>
-<p>默认自动启动一个<code>OpenAPI</code>风格的API文档<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:61593/docs</span><br></pre></td></tr></table></figure></p>
-<p>而此时<code>swagger.json</code>文件的服务器地址是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://localhost:61593/swagger.json</span><br></pre></td></tr></table></figure></p>
-<p>需要把这个地址放到<code>swagger-ui</code>里，就可以显示<code>swagger-ui</code>风格的API文档</p>
-<h2 id="如何编写api注释"><a href="#如何编写api注释" class="headerlink" title="如何编写api注释"></a>如何编写api注释</h2><p>下面是一个例子，详细的可以参考goswagger的文档<code>https://goswagger.io</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">// swagger:operation GET /v1/auth/domain/get domainController getDomainInfo</span><br><span class="line">//</span><br><span class="line">// If the request is successful, will return domain information that the user be able to access.</span><br><span class="line">//</span><br><span class="line">// The system will check user permissions.</span><br><span class="line">// So,you must first login system,and then you can send the request.</span><br><span class="line">//</span><br><span class="line">// You must pass in two arguments, first is offset ,second is limit.</span><br><span class="line">//</span><br><span class="line">// ---</span><br><span class="line">// produces:</span><br><span class="line">// - application/json</span><br><span class="line">// - application/xml</span><br><span class="line">// - text/xml</span><br><span class="line">// - text/html</span><br><span class="line">// parameters:</span><br><span class="line">// - name: offset</span><br><span class="line">//   in: query</span><br><span class="line">//   description: start row number</span><br><span class="line">//   required: true</span><br><span class="line">//   type: integer</span><br><span class="line">//   format: int32</span><br><span class="line">// - name: limit</span><br><span class="line">//   in: query</span><br><span class="line">//   description: maximum number of results to return</span><br><span class="line">//   required: true</span><br><span class="line">//   type: integer</span><br><span class="line">//   format: int32</span><br><span class="line">// responses:</span><br><span class="line">//   &apos;200&apos;:</span><br><span class="line">//     description: success</span><br><span class="line">//   &apos;403&apos;:</span><br><span class="line">//     description: Insufficient permissions</span><br><span class="line">//   &apos;421&apos;:</span><br><span class="line">//     description: get domain information failed.</span><br></pre></td></tr></table></figure></p>
 
       
     </div>
@@ -404,8 +418,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/07/k8s-create/" rel="next" title="kubernetes pod create流程">
-                <i class="fa fa-chevron-left"></i> kubernetes pod create流程
+              <a href="/2019/01/04/数据库锁/" rel="next" title="数据库锁">
+                <i class="fa fa-chevron-left"></i> 数据库锁
               </a>
             
           </div>
@@ -413,10 +427,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/05/07/goim解析-架构图/" rel="prev" title="goim解析-架构图">
-                goim解析-架构图 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -545,7 +555,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#swagger-ui的使用"><span class="nav-number">1.</span> <span class="nav-text">swagger-ui的使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何编写swagger-json"><span class="nav-number">2.</span> <span class="nav-text">如何编写swagger.json</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何使用go-swagger"><span class="nav-number">3.</span> <span class="nav-text">如何使用go-swagger</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#如何编写api注释"><span class="nav-number">4.</span> <span class="nav-text">如何编写api注释</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#namespace和cgroups"><span class="nav-number">1.</span> <span class="nav-text">namespace和cgroups</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#独立的用户系统"><span class="nav-number">1.1.</span> <span class="nav-text">独立的用户系统</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#独立的主机名"><span class="nav-number">1.2.</span> <span class="nav-text">独立的主机名</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#独立的进程树"><span class="nav-number">1.3.</span> <span class="nav-text">独立的进程树</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#IPC通信"><span class="nav-number">1.4.</span> <span class="nav-text">IPC通信</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#独立的文件系统，可以从镜像启动"><span class="nav-number">1.5.</span> <span class="nav-text">独立的文件系统，可以从镜像启动</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#独立的网络"><span class="nav-number">1.6.</span> <span class="nav-text">独立的网络</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#网络也有自己的安全机制，可以控制数据的进出"><span class="nav-number">1.7.</span> <span class="nav-text">网络也有自己的安全机制，可以控制数据的进出</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#资源限制"><span class="nav-number">1.8.</span> <span class="nav-text">资源限制</span></a></li></ol></li></ol></div>
             
 
           </div>

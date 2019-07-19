@@ -274,6 +274,174 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/07/19/从虚拟机使用角度看docker容器实现/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fengbeihong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fengbeihong">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/07/19/从虚拟机使用角度看docker容器实现/" itemprop="url">
+                  从虚拟机使用角度看docker容器实现
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-07-19 19:48:01 / Modified: 20:00:07" itemprop="dateCreated datePublished" datetime="2019-07-19T19:48:01+08:00">2019-07-19</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>本文旨在从虚拟机使用的角度对照着理解docker容器的实现。<br>容器化技术也是属于虚拟化的一种，虚拟机的虚拟化不管技术如何实现，使用者角度体验都是类似。</p>
+<h4 id="namespace和cgroups"><a href="#namespace和cgroups" class="headerlink" title="namespace和cgroups"></a>namespace和cgroups</h4><p>namespace的隔离机制是虚拟化的基础，Linux在chroot的基础上提供了对UTS、IPC、mount、PID、network、User等隔离机制。而cgroups在隔离的基础上，提供了资源的限制和控制功能。<br>这些基础技术的文章已经有很多，推荐看下左耳朵耗子的，本文只希望从稍微大点的层面把这些概念串起来。</p>
+<hr>
+<p>当我们希望虚拟出一个貌似独立的操作系统环境时，都需要哪方面的虚拟化，以及在容器里如何实现的？</p>
+<p><img src="images/1563537073737.jpg" alt=""></p>
+<h5 id="独立的用户系统"><a href="#独立的用户系统" class="headerlink" title="独立的用户系统"></a>独立的用户系统</h5><p>登录该操作系统需要一个用户，那么不管是root还是非root，都需要一套独立的用户系统。<br>User namespace可以提供该功能，容器内的用户和外部不会冲突。</p>
+<h5 id="独立的主机名"><a href="#独立的主机名" class="headerlink" title="独立的主机名"></a>独立的主机名</h5><p>UTS namespace可以提供该隔离功能。</p>
+<h5 id="独立的进程树"><a href="#独立的进程树" class="headerlink" title="独立的进程树"></a>独立的进程树</h5><p>PID namespace可以提供该隔离功能。</p>
+<h5 id="IPC通信"><a href="#IPC通信" class="headerlink" title="IPC通信"></a>IPC通信</h5><p>IPC namespace可以提供该隔离功能。</p>
+<h5 id="独立的文件系统，可以从镜像启动"><a href="#独立的文件系统，可以从镜像启动" class="headerlink" title="独立的文件系统，可以从镜像启动"></a>独立的文件系统，可以从镜像启动</h5><p>典型的Linux文件系统由bootfs和rootfs组成，bootfs(boot file system)主要包含 bootloader和kernel，bootloader主要是引导加载kernel，当kernel被加载到内存中后 bootfs就被umount了。rootfs (root file system) 包含的就是典型 Linux 系统中的/dev，/proc，/bin，/etc等标准目录和文件。</p>
+<p>Mount namespace可以提供该隔离功能（类似于chroot命令），而在docker里用这个功能挂载rootfs，并且和AUFS(也可以是其他的Union 文件系统)一起使用。各种容器里运行的进程不一定需要这么多系统目录，在docker里把原本linux文件系统里的rootfs分为多份，使用AUFS的union mount技术一层一层组合起来，组成read only层，最上层则有write权限，可以由容器中允许的进程修改。</p>
+<p>linux镜像的内容和其文件系统一致，有bootfs和rootfs，而docker有自己的启动方式，所以上面的readonly层和readwrite层组合起来就是最终的docker镜像。</p>
+<p><img src="images/1563537213621.jpg" alt=""></p>
+<h5 id="独立的网络"><a href="#独立的网络" class="headerlink" title="独立的网络"></a>独立的网络</h5><p>和宿主机隔离开，有自己的网络设备和网段。</p>
+<p>Network namespace可以提供该隔离功能，网络设备在两个namespace之间是互相看不到的。但也只是隔离，虚拟机中的网络设备模拟正常的linux系统，有许多默认的比如lo设备，还有自己的网卡设备，docker都可以模拟出来。</p>
+<p>docker有多种网络模式，这里只用下图说明下bridge网络模式。</p>
+<p>docker的namespace内创建一个网卡设备,宿主机创建一个bridge设备，通过veth pair讲两者连接起来，则成功将两个network namespace的设备连通。</p>
+<p><img src="images/1563537385477.jpg" alt=""></p>
+<h5 id="网络也有自己的安全机制，可以控制数据的进出"><a href="#网络也有自己的安全机制，可以控制数据的进出" class="headerlink" title="网络也有自己的安全机制，可以控制数据的进出"></a>网络也有自己的安全机制，可以控制数据的进出</h5><p>有了上面的模拟网络的基础，则可以通过宿主机的iptables来控制网络数据。</p>
+<h5 id="资源限制"><a href="#资源限制" class="headerlink" title="资源限制"></a>资源限制</h5><p>上述隔离算是对环境的隔离，以及对linux环境的模拟，在实际使用中还要有对资源的隔离，这时cgroups派上用场，可以对CPU、memory等资源的使用加以限制或控制。</p>
+<hr>
+<p>上面讲了可以用来做容器虚拟化的各种系统功能，但是这一切功能在具体实现中都需要一个起点，这个起点就是开启一个新的进程。</p>
+<p>各种namespace的使用在具体代码实现中，都是fork一个新的进程过程中，使用不同的系统调用或选项参数组合，来决定这个新的进程进行哪些环境的隔离。比如说network namespace，可以控制容器启动时可以和宿主机处于同一个network namespace下，这种就是docker的host网络模式，可以宿主机直连。</p>
+<p>启动的新进程在docker容器里就是dockerinit进程，该进程做一些初始化工作，使用cgroups对资源使用做限制，或者创建容器的network namespace下的网络设备等等，最后则会执行entrypoint或者用户定义的CMD应用程序（Dockerfile中的CMD）。</p>
+<p>如下图，所有的这些工作都是在同一个进程下进行的，一般情况下，一个容器就是一个进程。</p>
+<p><img src="images/1563537478197.jpg" alt=""></p>
+<blockquote>
+<p>参考文章<br>《Docker源码分析》<br><a href="https://coolshell.cn/articles/17010.html" target="_blank" rel="noopener">https://coolshell.cn/articles/17010.html</a><br><a href="https://coolshell.cn/articles/17029.html" target="_blank" rel="noopener">https://coolshell.cn/articles/17029.html</a><br><a href="https://coolshell.cn/articles/17049.html" target="_blank" rel="noopener">https://coolshell.cn/articles/17049.html</a></p>
+</blockquote>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/04/数据库锁/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1693,161 +1861,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/bash-shell-tips/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="fengbeihong">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="fengbeihong">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/07/bash-shell-tips/" itemprop="url">
-                  Bash Shell Tips
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-
-            
-            
-            
-
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-
-              
-                
-              
-
-              <time title="Created: 2018-01-07 07:56:15 / Modified: 17:57:41" itemprop="dateCreated datePublished" datetime="2018-01-07T07:56:15+08:00">2018-01-07</time>
-            
-
-            
-              
-
-              
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>对企业级产品里的脚本中常用shell做个记录，平时不写shell很少注意到。</p>
-<h2 id="set"><a href="#set" class="headerlink" title="set"></a>set</h2><p>控制环境变量<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">set -o errexit -o nounset -o pipefail</span><br></pre></td></tr></table></figure></p>
-<h2 id="shift"><a href="#shift" class="headerlink" title="shift"></a>shift</h2><p>用来修改参数数组<code>$@</code><br>假设执行shell命令<code>bash test.sh 1 2 3 4 5</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line">echo $@  # 1 2 3 4 5</span><br><span class="line"></span><br><span class="line">shift</span><br><span class="line"># 等同于shift 1</span><br><span class="line">echo $@  # 2 3 4 5</span><br><span class="line"></span><br><span class="line">shift</span><br><span class="line">echo $@  # 3 4 5</span><br><span class="line"></span><br><span class="line">shift 2</span><br><span class="line">echo $@  # 5</span><br></pre></td></tr></table></figure></p>
-<p>可以看到shift可以加参数也可以不加，加参数就是从当前参数数组的第几个参数开始截断</p>
-<h2 id="0"><a href="#0" class="headerlink" title="$? $0 $@"></a>$? $0 $@</h2><p>返回值，参数，默认值等等<br>${4:-$COMMAND}</p>
-<h2 id="declare"><a href="#declare" class="headerlink" title="declare"></a>declare</h2><p>声明参数<br>尤其是声明全局参数</p>
-<h2 id="if"><a href="#if" class="headerlink" title="if"></a>if</h2><p>判断表达式的用法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">if [ -d /test_dir/ ]; then</span><br><span class="line">    # 检测目录是否存在</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">if [ -f /test_file ]; then</span><br><span class="line">    # 检测文件是否存在</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">if [ -z $TEST_VAL ]; then</span><br><span class="line">    # 如果变量为空</span><br><span class="line">fi</span><br></pre></td></tr></table></figure></p>
-<p>比较两个浮点型变量<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">$s1=10</span><br><span class="line">$s2=9</span><br><span class="line"></span><br><span class="line">echo $s1&apos;&gt;&apos;$s2 | bc -l</span><br><span class="line">0</span><br><span class="line">echo $s2&apos;&gt;&apos;$s1 | bc -l</span><br><span class="line">1</span><br><span class="line"></span><br><span class="line">$s1=10</span><br><span class="line">$s2=10</span><br><span class="line"></span><br><span class="line">echo $s1&apos;&gt;&apos;$s2 | bc -l</span><br><span class="line">0</span><br><span class="line">echo $s2&apos;&gt;&apos;$s1 | bc -l</span><br><span class="line">0</span><br></pre></td></tr></table></figure></p>
-<h2 id="trap"><a href="#trap" class="headerlink" title="trap"></a>trap</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">trap - INT</span><br></pre></td></tr></table></figure>
-<h2 id="tr"><a href="#tr" class="headerlink" title="tr"></a>tr</h2><p><code>tr</code></p>
-<h2 id="cut"><a href="#cut" class="headerlink" title="cut"></a>cut</h2><p><code>cut</code></p>
-<h2 id="cat"><a href="#cat" class="headerlink" title="cat"></a>cat</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOM</span><br><span class="line">EOM</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cat &lt;&lt;EOF</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
-<h2 id="local"><a href="#local" class="headerlink" title="local"></a>local</h2><p><code>local</code></p>
-<h2 id="echo-e"><a href="#echo-e" class="headerlink" title="echo -e"></a>echo -e</h2><p><code>echo -e</code></p>
-<h2 id="case-esac"><a href="#case-esac" class="headerlink" title="case esac"></a>case esac</h2><p><code>case esac</code></p>
-
-          
-        
-      
-    </div>
-
-    
-
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1895,7 +1908,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">17</span>
+                    <span class="site-state-item-count">18</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
