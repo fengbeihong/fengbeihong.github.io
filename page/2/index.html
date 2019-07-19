@@ -103,12 +103,12 @@
 
 
   <meta property="og:type" content="website">
-<meta property="og:title" content="Hexo">
+<meta property="og:title" content="fengbeihong">
 <meta property="og:url" content="http://yoursite.com/page/2/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="fengbeihong">
 <meta property="og:locale" content="default">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexo">
+<meta name="twitter:title" content="fengbeihong">
 
 
 
@@ -125,7 +125,7 @@
   };
 </script>
 
-  <title>Hexo</title>
+  <title>fengbeihong</title>
   
 
 
@@ -184,7 +184,7 @@
     <div class="custom-logo-site-title">
       <a href="/" class="brand" rel="start">
         <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Hexo</span>
+        <span class="site-title">fengbeihong</span>
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
@@ -274,6 +274,423 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/solum简介/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fengbeihong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fengbeihong">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/07/solum简介/" itemprop="url">
+                  Solum简介
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 07:53:23 / Modified: 17:59:44" itemprop="dateCreated datePublished" datetime="2018-01-07T07:53:23+08:00">2018-01-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>solum是部署web application的项目。<br>web app都是跑在各种web server中，所以solum的操作就分为了languagepack和app两个部分。</p>
+<p>solum的作用</p>
+<ul>
+<li>搭建自动测试系统，并且可以设置在多个版本的runtime环境中进行测试。</li>
+<li>自动化部署</li>
+<li>应用开发的整个生命周期管理</li>
+<li>上述这些都可以和github和docker的特性结合起来，快捷方便</li>
+<li>CI/CD</li>
+</ul>
+<p>下面是部署部署一个app的流程的用到的命令总览：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$ solum languagepack create &lt;NAME&gt; &lt;GIT_REPO&gt;</span><br><span class="line">$ solum languagepack show &lt;UUID/Name&gt;</span><br><span class="line">$ solum languagepack logs &lt;UUID&gt;</span><br><span class="line">$ solum languagepack list</span><br><span class="line">$ solum app create --app-file &lt;app_file&gt; [--param-file param_file]</span><br><span class="line">$ solum app show &lt;UUID/Name&gt;</span><br><span class="line">$ curl &lt;application_uri&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="languagepack"><a href="#languagepack" class="headerlink" title="languagepack"></a>languagepack</h3><p>这个步骤可以创建python、java或其他语言的web应用运行环境。<br>languagepack需要指定一个git repo，下载Dockerfile和build.sh。</p>
+<ul>
+<li>Dockerfile用来创建docker image。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">FROM ubuntu:14.04</span><br><span class="line"></span><br><span class="line">RUN apt-get -yqq update</span><br><span class="line">RUN apt-get -yqq install python-pip</span><br><span class="line">RUN apt-get -yqq install python-dev</span><br><span class="line"></span><br><span class="line">COPY build.sh /solum/bin/</span><br></pre></td></tr></table></figure>
+<ul>
+<li>build.sh用来在创建app时执行。</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#!/bin/bash</span><br><span class="line"></span><br><span class="line"># Check if pip is installed</span><br><span class="line">pip help</span><br><span class="line">[[ $? != 0 ]] &amp;&amp; echo python-pip is not installed. &amp;&amp; exit 1</span><br><span class="line"></span><br><span class="line"># Install dependencies from app requirements file</span><br><span class="line">cd /app</span><br><span class="line">pip install -r requirements.txt</span><br></pre></td></tr></table></figure>
+<h3 id="app"><a href="#app" class="headerlink" title="app"></a>app</h3><p>创建app会包含一个workflow流程，根据已有的languagepack创建最终的deployment unit(DU)，然后用heat去部署.</p>
+<h4 id="deployment-unit-DU"><a href="#deployment-unit-DU" class="headerlink" title="deployment unit(DU)"></a>deployment unit(DU)</h4><p>DU就是一个打包好的安装了运行环境和application的docker image，可以直接用来创建container运行。<br>当然这个docker image需要languagepack和app两个步骤最终完成创建。</p>
+<h4 id="workflow"><a href="#workflow" class="headerlink" title="workflow"></a>workflow</h4><ul>
+<li>unittest</li>
+<li>build</li>
+<li>deploy</li>
+</ul>
+<p>标准的三个步骤，但是这个三个步骤可以选择性的执行，比如只执行unittest和build.</p>
+<p>workflow的相关信息都是在appfile.yaml里定义，由参数–app-file指定。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">version: 1</span><br><span class="line">name: cherrypy</span><br><span class="line">description: python web app</span><br><span class="line">languagepack: python</span><br><span class="line">source:</span><br><span class="line">  repository: https://github.com/rackspace-solum-samples/solum-python-sample-app.git</span><br><span class="line">  revision: master</span><br><span class="line">workflow_config:</span><br><span class="line">  test_cmd: ./unit_tests.sh  # 在unittest步骤里执行什么命令</span><br><span class="line">  run_cmd: python app.py  # 在build步骤执行什么命令</span><br><span class="line">trigger_actions:</span><br><span class="line"> - unittest</span><br><span class="line"> - build</span><br><span class="line"> - deploy  # 就是nova boot的步骤，不过这个依赖nova-docker</span><br><span class="line">ports:</span><br><span class="line"> - 80</span><br></pre></td></tr></table></figure>
+<ul>
+<li>unittest会根据LP去执行<code>docker build</code>，执行unittest脚本，但是不会保存到glance或swift里</li>
+<li>build这个步骤，根据LP执行<code>docker build</code>，执行build.sh脚本，最终保存到glance或swift里</li>
+<li>deploy就是通过heat进行nova boot的步骤，依赖nova-docker驱动，从neutron申请IP，从glance下载image。这些取代了直接通过docker的api进行创建容器。<br>这个步骤可以和k8s、mesos以及swarm结合使用。<br>solum的配置文件中有这个参数：<code>docker_daemon_url = unix://var/run/docker.sock</code><br>solum的对docker的操作，都是通过url的remote API进行请求的。那么，对于docker服务，可以是单独的docker服务，也可以是k8s之类的集群，只要提供和docker一致的API。</li>
+</ul>
+<blockquote>
+<p><a href="https://wiki.openstack.org/wiki/Solum/configurations" target="_blank" rel="noopener">https://wiki.openstack.org/wiki/Solum/configurations</a> solum的deploy可以基于docker部署，也可以基于VM</p>
+</blockquote>
+<ul>
+<li>docker<ul>
+<li>设置nova-docker驱动 <code>/etc/nova/nova.conf</code>: compute_driver = novadocker.virt.docker.driver.DockerDriver</li>
+<li>把solum的存储项设置为glance <code>/etc/solum/solum.conf</code> image_storage = glance</li>
+<li>最后部署的时候需要用<code>basic</code>heat template，<a href="https://github.com/openstack/solum/blob/master/etc/solum/templates/basic.yaml" target="_blank" rel="noopener">https://github.com/openstack/solum/blob/master/etc/solum/templates/basic.yaml</a></li>
+</ul>
+</li>
+<li>VM<ul>
+<li><code>/etc/nova/nova.conf</code> compute_driver = libvirt.LibvirtDriver</li>
+<li><code>/etc/solum/solum.conf</code> image_storage = swift，image_format = vm</li>
+</ul>
+</li>
+</ul>
+<p>当用VM在solum里部署应用时，步骤比较绕</p>
+<ul>
+<li>用disk-image-builder创建带有docker的VM image</li>
+<li>用这个image创建docker的container，再通过docker的api去安装app的源码，进行测试等操作，最后把image保存到glance</li>
+<li>最终用这个image部署在VM上</li>
+</ul>
+<h4 id="param-file"><a href="#param-file" class="headerlink" title="param_file"></a>param_file</h4><p>在<code>solum app create</code>时也可以用–param-file指定想要inject的参数<br>这些参数可以通过build步骤里命令脚本去操作</p>
+<h3 id="app代码的自动更新部署"><a href="#app代码的自动更新部署" class="headerlink" title="app代码的自动更新部署"></a>app代码的自动更新部署</h3><p>app的代码也在git里，而且可以在自己的git里设置hook，在提交代码后，自动向这个web app的地址发送一个POST请求</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://10.0.2.15:9777/v1/triggers/&lt;trigger_id&gt;</span><br></pre></td></tr></table></figure>
+<p>solum会自动重新build一个新的image然后重新部署app</p>
+<p>如果是github的源码，在project的设置里可以设定这个trigger url</p>
+<h3 id="devstack开发环境"><a href="#devstack开发环境" class="headerlink" title="devstack开发环境"></a>devstack开发环境</h3><p>一共有两种方式，一种用vagrant一种用devstack，直接devstack就可以。</p>
+<p>wiki文档地址：<a href="https://wiki.openstack.org/wiki/Solum/solum-development-setup" target="_blank" rel="noopener">https://wiki.openstack.org/wiki/Solum/solum-development-setup</a></p>
+<ul>
+<li>local.conf文件直接从它提供的外网地址下载</li>
+<li>local.conf的配置尤其是密码最好别变，有的服务的密码没有做成可配置，仍然是默认的solum，改动会导致后续的验证失败。</li>
+<li>nova和neutron先手动下载源码后再git checkout到指定的change id里，应该是最新代码还没测试完。</li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/DCOS和mesos/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="fengbeihong">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="fengbeihong">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/07/DCOS和mesos/" itemprop="url">
+                  DCOS和mesos
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-01-07 07:53:06 / Modified: 18:06:17" itemprop="dateCreated datePublished" datetime="2018-01-07T07:53:06+08:00">2018-01-07</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="Mesos"><a href="#Mesos" class="headerlink" title="Mesos"></a>Mesos</h3><p>mesos本身的目的是针对当前的各种分布式系统的抽象，拿原始的操作系统进行对比，内核控制各个进程执行某些任务，而到了分布式时代，要从更高层面去看，把每个物理节点当做一个进程，有专门的服务作为抽象的内核对进程进行调控，分配给各个进程去执行任务，就像下面的图，特别像操作系统的概念。<br><img src="https://docs.mesosphere.com/1.10/img/dcos-architecture-layers.png" alt="mesos架构"></p>
+<h3 id="DC-OS"><a href="#DC-OS" class="headerlink" title="DC/OS"></a>DC/OS</h3><p>Data Center Operating System<br>算是mesos的超集，采用了mesos的kernel，然后把mesos中常用的framework(mesos中的概念，表示进程要执行的任务，具体到节点就是mesos的某些agent节点组成的安装的具体的分布式软件)整合到了dcos中，并且提供了良好的界面和CLI，也继承了许多企业级服务如marathon和chronos等，用dcos来完成mesos的data center功能十分高效便捷。</p>
+<p><a href="https://support.mesosphere.com/hc/en-us/articles/205097325-How-is-the-Mesosphere-DCOS-different-from-Apache-Mesos-" target="_blank" rel="noopener">https://support.mesosphere.com/hc/en-us/articles/205097325-How-is-the-Mesosphere-DCOS-different-from-Apache-Mesos-</a></p>
+<h3 id="DC-OS是运行容器的最好方式"><a href="#DC-OS是运行容器的最好方式" class="headerlink" title="DC/OS是运行容器的最好方式"></a>DC/OS是运行容器的最好方式</h3><p><a href="https://mesosphere.com/blog/2016/04/19/open-source-dcos/" target="_blank" rel="noopener">https://mesosphere.com/blog/2016/04/19/open-source-dcos/</a></p>
+<p>mesos可以安装运行各种分布式软件，当然也包括docker，不过在最新的mesos1.0中，mesos也实现了自己的容器化技术，就算不安装docker也可以跑容器了。当然，这些容器化技术大概在2015年都统一了标准，互相兼容的。</p>
+<h3 id="mesos的手动配置"><a href="#mesos的手动配置" class="headerlink" title="mesos的手动配置"></a>mesos的手动配置</h3><p>按照magnum中的部署mesos环境的步骤，手动配置的话模板里会有以下和mesos相关的参数：</p>
+<h3 id="magnum部署mesos的流程"><a href="#magnum部署mesos的流程" class="headerlink" title="magnum部署mesos的流程"></a>magnum部署mesos的流程</h3><ul>
+<li>首先准备image文件，在image文件会安装好mesos服务所需的zookeeperd、mesos和marathon服务，以及docker-engine服务。</li>
+<li>先启动magnum参数所指定的几个master虚拟机，启动完成后会对master节点的服务进行配置，并且启动这些服务。</li>
+<li>然后启动agent节点，启动完成后会在节点内部创建<code>/etc/sysconfig/heat-params</code>文件，然后配置agent节点服务，启动服务，最后要等待执行<code>agent_wc_notify</code>操作，并且设置volume服务。</li>
+</ul>
+<h3 id="magnum中coe的设计思路"><a href="#magnum中coe的设计思路" class="headerlink" title="magnum中coe的设计思路"></a>magnum中coe的设计思路</h3><p>按照magnum里的coe的设计思路，是希望集群里所需要的软件都在image里安装好，之后只需要根据选项进行配置启动就可以。<br>那么如果把mesos换成dcos，dcos中涉及到的几十个应用也需要提前安装好，在部署完dcos后也可以随时安装卸载对应应用<br>这就得舍弃dcos提供的安装流程，相当于舍弃已经整合好的安装脚本，换成手动在magnum里重新实现一遍</p>
+<h3 id="dcos的安装流程"><a href="#dcos的安装流程" class="headerlink" title="dcos的安装流程"></a>dcos的安装流程</h3><p>说下advanced安装方式，在每个节点进行执行的操作来手动执行</p>
+<ul>
+<li>先准备两个文件<code>ip-detect</code>和<code>config.yaml</code>，检测IP和进行集群的配置</li>
+<li>下载安装脚本文件，这个shell文件里，其实除了脚本还包含了压缩包二进制文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ curl -O https://downloads.dcos.io/dcos/EarlyAccess/commit/14509fe1e7899f439527fb39867194c7a425c771/dcos_generate_config.sh</span><br></pre></td></tr></table></figure>
+<ul>
+<li>执行<code>dcos_generate_config.sh</code>脚本文件，默认的参数就是<code>--genconf</code>，生成了安装的配置信息，文件和路径信息就会如下</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">├── dcos-genconf.&lt;HASH&gt;.tar</span><br><span class="line">├── dcos_generate_config.sh</span><br><span class="line">├── genconf</span><br><span class="line">│   ├── serve</span><br><span class="line">│   │   ├── dcos_install.sh</span><br><span class="line">│   ├── config.yaml</span><br><span class="line">│   ├── ip-detect</span><br><span class="line">│   ├── cluster_packages.json</span><br><span class="line">│   ├── ssh_key</span><br><span class="line">│   ├── state</span><br></pre></td></tr></table></figure>
+<ul>
+<li>然后执行<code>docker run</code>，这一步会在bootstrap node启动一个nginx的容器服务，映射端口，并且把<code>./genconf/serve/</code>目录映射到nginx容器里的<code>/usr/share/nginx/html</code>，路径映射的结果就是，可以从其他节点访问nginx服务获取<code>serve</code>目录下的文件</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ sudo docker run -d -p &lt;your-port&gt;:80 -v $PWD/genconf/serve:/usr/share/nginx/html:ro nginx</span><br></pre></td></tr></table></figure>
+<ul>
+<li>剩下的步骤就是登录到各个节点，master和agent节点，下载下来dcos_install.sh，然后执行安装就可以了<br>安装时要指定<code>role</code>，即当前机器为哪类节点，支持<code>master</code>，<code>slave</code>，<code>slave_public</code></li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ssh &lt;master-ip&gt;</span><br><span class="line">$ mkdir /tmp/dcos &amp;&amp; cd /tmp/dcos</span><br><span class="line">$ curl -O http://&lt;bootstrap-ip&gt;:&lt;your_port&gt;/dcos_install.sh</span><br><span class="line">$ sudo bash dcos_install.sh master</span><br></pre></td></tr></table></figure>
+<ul>
+<li>最后一步就是等待安装完成并且各个节点之间同步完成，如何检测状态，查看<code>Exhibitor</code>服务的信息</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://&lt;master-ip&gt;:8181/exhibitor/v1/ui/index.html</span><br></pre></td></tr></table></figure>
+<ul>
+<li>现在可以启动DCOS的web界面</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">http://&lt;master-node-public-ip&gt;/</span><br></pre></td></tr></table></figure>
+<h3 id="bootstrap-node"><a href="#bootstrap-node" class="headerlink" title="bootstrap node"></a>bootstrap node</h3><p>bootstrap节点是干啥的，在安装过程中都会先启动bootstrap node，把要安装的东西压下载到bootstrap node，生成配置文件，然后进行安装。<br>安装时也会通过某种方式把配置文件和安装脚本拷贝到master或者agent节点去，然后在具体的节点上执行安装。<br>文档说bootstrap node是集群的永久性节点，但是个人感觉不是必须的，只是集群必须有一个执行安装程序的节点，卸载时也会需要一个节点来跑执行程序，那么就放到了bootstrap node上，然后bootstrap node也提供了界面化的安装和卸载。<br>如果把安装放到magnum里去做，那么执行安装程序的操作就交给了magnum的HOT去做，拷贝文件也可以由magnum去做，卸载就是直接删除集群节点，整个流程就用不到bootstrap node了。<br>另外，在dcos官网的design页面看到，components需要提前下载，并且是在bootstrap node下载，并且build完成，打包，然后再copy到master或agent节点去安装。<br>那么如果修改的话就方便了，因为dcos_install.sh脚本做的工作就是一个下载，解压，修改配置文件和启动服务。之前的操作放置到DIB里去做。</p>
+<h3 id="在安装过程中，master节点，agent节点和bootstrap节点都做了什么具体的工作"><a href="#在安装过程中，master节点，agent节点和bootstrap节点都做了什么具体的工作" class="headerlink" title="在安装过程中，master节点，agent节点和bootstrap节点都做了什么具体的工作"></a>在安装过程中，master节点，agent节点和bootstrap节点都做了什么具体的工作</h3><p>参照官网文档：<a href="https://dcos.io/docs/1.8/overview/architecture/" target="_blank" rel="noopener">https://dcos.io/docs/1.8/overview/architecture/</a></p>
+<h3 id="DC-OS的安装脚本生成流程，以及安装流程"><a href="#DC-OS的安装脚本生成流程，以及安装流程" class="headerlink" title="DC/OS的安装脚本生成流程，以及安装流程"></a>DC/OS的安装脚本生成流程，以及安装流程</h3><p>dcos的源码下载下来后，根目录执行<code>build_local.sh</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># Install the DC/OS tools</span><br><span class="line">./prep_local</span><br><span class="line"></span><br><span class="line"># Build a release of DC/OS</span><br><span class="line">release create `whoami` local_build</span><br></pre></td></tr></table></figure>
+<p>第一步pre_local会执行setuptools的打包脚本，打包出一些需要的命令，比如release命令(python命令)<br>第二步就正式执行打包命令</p>
+<ul>
+<li>下载packages，编译，保存编译结果</li>
+<li>把一些模板文件和配置文件初始化</li>
+<li>把上述的文件根据Dockerfile，docker build出docker image的tar包</li>
+<li>最终把docker image和脚本文件合并成为<code>dcos_generate_config.sh</code></li>
+</ul>
+<p>dcos_generate_config.sh是最初的安装脚本，由脚本和一个docker image二进制数据共同组成。</p>
+<ul>
+<li>脚本由dcos_generate_config.sh.in模板生成</li>
+<li>docker image由配置的各个文件和Dockerfile，一起<code>docker build</code>后进行<code>docker save</code>的一个tar包。所以不能只看tar包信息，需要看<code>docker build</code>前的原始信息。</li>
+</ul>
+<p>执行<code>dcos_generate_config.sh --genconf</code>会生成配置文件，这一步会执行<code>docker run</code>，运行的就是docker image里的内容。那么要看如何生成配置文件，就需要看docker image是如何生成的。<br><code>dcos_generate_config.sh --genconf</code>在源码中的entry_point是<code>ext/dcos-installer/cli.py:main</code></p>
+<p>综上，要抽出安装脚本中需要的部分：packages文件、配置文件以及安装脚本<br>其中packages文件要放到DIB中，配置文件无需改动的放到DIB中，安装脚本和部分需要改动的配置文件放在外面<br>对应到执行命令，就是<code>dcos_generate_config.sh --genconf</code>这个操作时，会变动的配置文件放到外面，其他的放到DIB中</p>
+<ul>
+<li>下载dcos源码，从头制作安装文件<br>这种需要重新下载和build各个packages包，还要初始化各个配置文件，耗时长，也有很多不确定因素会导致失败</li>
+<li>直接下载编译好的dcos_generate_config.sh<br>这种需要执行<code>docker run</code>才能生成配置文件，依赖docker，但是解压文件后都是编译好的packages，节省时间，但是下载整个文件也需要花一定时间。</li>
+</ul>
+<p>制作DIB</p>
+<ul>
+<li>下载<code>dcos_generate_config.sh</code>，执行<code>dcos_generate_config.sh --genconf</code>，生成配置文件</li>
+<li>找到安装过程脚本，单独执行，把packages文件和配置文件放置到对应位置，生成DIB</li>
+</ul>
+<p>magnum中的可配置文件</p>
+<ul>
+<li>找到生成配置文件的脚本，把ip-detect和cloud-config.yaml所影响的配置文件集中放置在magnum中，初始化这些模板文件后，拷贝到对应位置</li>
+<li><code>ext/dcos-installer/cli.py:main</code></li>
+</ul>
+
+          
+        
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/magnum-bay-create简析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -283,7 +700,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="fengbeihong">
     </span>
 
     
@@ -441,7 +858,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="fengbeihong">
     </span>
 
     
@@ -599,7 +1016,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="fengbeihong">
     </span>
 
     
@@ -859,7 +1276,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="fengbeihong">
     </span>
 
     
@@ -1020,7 +1437,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="fengbeihong">
     </span>
 
     
@@ -1203,7 +1620,7 @@
                 
                   <a href="/archives/">
                 
-                    <span class="site-state-item-count">15</span>
+                    <span class="site-state-item-count">17</span>
                     <span class="site-state-item-name">posts</span>
                   </a>
                 </div>
@@ -1262,7 +1679,7 @@
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love" id="animate">
     <i class="fa fa-user"></i>
   </span>
