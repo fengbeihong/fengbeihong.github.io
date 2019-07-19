@@ -102,24 +102,25 @@
 
 
 
-  <meta name="description" content="swift配置时，一般会在系统里单独挂载一个目录，然后当修改配置后，有时候会在系统启动时挂载磁盘时出现错误。1Continue to wait; or Press S to skip mounting or M for manual recovery 在配置swift时都会配置/etc/fstab这个文件，会让系统启动时自动挂载设备。想要跳过这个错误，也可以在该配置文件中加参数nobootwait">
+  <meta name="description" content="1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计">
+<meta name="keywords" content="k8s">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Swift的相关问题">
-<meta property="og:url" content="http://yoursite.com/2018/01/07/swift的相关问题/index.html">
+<meta property="og:title" content="k8s创建pod的流程">
+<meta property="og:url" content="http://yoursite.com/2018/01/07/k8s的创建pod的流程/index.html">
 <meta property="og:site_name" content="fengbeihong">
-<meta property="og:description" content="swift配置时，一般会在系统里单独挂载一个目录，然后当修改配置后，有时候会在系统启动时挂载磁盘时出现错误。1Continue to wait; or Press S to skip mounting or M for manual recovery 在配置swift时都会配置/etc/fstab这个文件，会让系统启动时自动挂载设备。想要跳过这个错误，也可以在该配置文件中加参数nobootwait">
+<meta property="og:description" content="1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-01-07T08:06:56.000Z">
+<meta property="og:updated_time" content="2019-07-19T12:43:54.215Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Swift的相关问题">
-<meta name="twitter:description" content="swift配置时，一般会在系统里单独挂载一个目录，然后当修改配置后，有时候会在系统启动时挂载磁盘时出现错误。1Continue to wait; or Press S to skip mounting or M for manual recovery 在配置swift时都会配置/etc/fstab这个文件，会让系统启动时自动挂载设备。想要跳过这个错误，也可以在该配置文件中加参数nobootwait">
+<meta name="twitter:title" content="k8s创建pod的流程">
+<meta name="twitter:description" content="1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/07/swift的相关问题/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/01/07/k8s的创建pod的流程/"/>
 
 
 
@@ -129,7 +130,7 @@
   };
 </script>
 
-  <title>Swift的相关问题 | fengbeihong</title>
+  <title>k8s创建pod的流程 | fengbeihong</title>
   
 
 
@@ -277,7 +278,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/swift的相关问题/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/k8s的创建pod的流程/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="fengbeihong">
@@ -294,7 +295,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Swift的相关问题
+          <h1 class="post-title" itemprop="name headline">k8s创建pod的流程
               
             
           </h1>
@@ -319,12 +320,24 @@
                 
               
 
-              <time title="Created: 2018-01-07 07:59:42 / Modified: 16:06:56" itemprop="dateCreated datePublished" datetime="2018-01-07T07:59:42+08:00">2018-01-07</time>
+              <time title="Created: 2018-01-07 15:52:58" itemprop="dateCreated datePublished" datetime="2018-01-07T15:52:58+08:00">2018-01-07</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-07-19 20:43:54" itemprop="dateModified" datetime="2019-07-19T20:43:54+08:00">2019-07-19</time>
               
             
           </span>
@@ -357,17 +370,7 @@
       
 
       
-        <p>swift配置时，一般会在系统里单独挂载一个目录，然后当修改配置后，有时候会在系统启动时挂载磁盘时出现错误。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Continue to wait; or Press S to skip mounting or M for manual recovery</span><br></pre></td></tr></table></figure></p>
-<p>在配置swift时都会配置<code>/etc/fstab</code>这个文件，会让系统启动时自动挂载设备。<br>想要跳过这个错误，也可以在该配置文件中加参数<code>nobootwait</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UUID=1234-5678 /osshare vfat utf8,auto,rw,user,nobootwait 0 0</span><br></pre></td></tr></table></figure>
-<p>具体的可以<code>man fstab</code>来查看相关信息</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The  mountall(8) program that mounts filesystem during boot also recognises additional options that the ordinary  mount(8) tool does not. These are:  bootwait which can be applied to remote filesystems mounted outside of /usr or /var, without which mountall(8) would not hold up the boot for these; nobootwait which can be applied to non-remote filesystems to explicitly instruct mountall(8) not to hold up the boot for them;</span><br></pre></td></tr></table></figure>
-<hr>
-<p>在用devstack安装开发环境后，如果重启，swift服务经常就不能用了。</p>
-<p>根据信息查看了目录mount情况<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">stack@magnum:/opt/stack/solum$ df -h</span><br><span class="line">Filesystem      Size  Used Avail Use% Mounted on</span><br><span class="line">udev            987M  4.0K  987M   1% /dev</span><br><span class="line">tmpfs           200M  544K  200M   1% /run</span><br><span class="line">/dev/dm-0        91G  6.5G   80G   8% /</span><br><span class="line">none            4.0K     0  4.0K   0% /sys/fs/cgroup</span><br><span class="line">none            5.0M     0  5.0M   0% /run/lock</span><br><span class="line">none           1000M  944K  999M   1% /run/shm</span><br><span class="line">none            100M     0  100M   0% /run/user</span><br><span class="line">/dev/sda1       236M   41M  183M  19% /boot</span><br></pre></td></tr></table></figure></p>
-<p>少了一个和swift相关的挂载<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/dev/loop0      6.0G  873M  5.2G  15% /opt/stack/data/swift/drives/sdb1</span><br></pre></td></tr></table></figure></p>
-<p>找到默认情况下，swift创建的swift.img，然后手动挂载上去<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount -t xfs -o loop,noatime,nodiratime,nobarrier,logbufs=8 /opt/stack/data/swift/drives/images/swift.img /opt/stack/data/swift/drives/sdb1/</span><br></pre></td></tr></table></figure></p>
-<p>最后还要把这个加到<code>/etc/fstab</code>里，重启时自动挂载，注意这里也加了上面提到的<code>nobootwait</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/opt/stack/data/swift/drives/sdb1/ /opt/stack/data/swift/drives/images/swift.img xfs noatime,nodiratime,nobootwait,nobarrier,logbufs=8 0 0</span><br></pre></td></tr></table></figure></p>
+        <p>1、用户执行kubectl命令创建pod，根据kubeconfig的配置像kube-apiserver发送创建请求。<br>2、kube-apiserver存储pod数据到etcd，然后返回。剩下的操作异步执行。<br>3、kube-scheduler通过kube-apiserver查看未绑定的pod，尝试为pod分配主机。<br>4、kube-scheduler的调度分为两步：过滤掉不符合要求的主机，为符合要求的主机计算权重。权重的计算设计到一些整体优化策略，比如replicas分配到不同主机，使用负载较低的主机等。<br>5、kube-scheduler选择权重最高的主机，进行binding操作，结果存储到etcd中。kube-scheduler会调用kube-apiserver在etcd创建boundpod对象，描述在一个工作节点上绑定运行的所有pod信息。<br>6、kubelet服务定时和etcd同步boundpod信息，发现一个新的boundpod对象没有在本节点工作，则调用Docker来创建pod。</p>
 
       
     </div>
@@ -386,6 +389,12 @@
 
     <footer class="post-footer">
       
+        <div class="post-tags">
+          
+            <a href="/tags/k8s/" rel="tag"># k8s</a>
+          
+        </div>
+      
 
       
       
@@ -395,8 +404,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/07/ironic和magnum中遇到的错误/" rel="next" title="Ironic和magnum中遇到的错误">
-                <i class="fa fa-chevron-left"></i> Ironic和magnum中遇到的错误
+              <a href="/2018/01/07/swift的相关问题/" rel="next" title="Swift的相关问题">
+                <i class="fa fa-chevron-left"></i> Swift的相关问题
               </a>
             
           </div>
@@ -405,8 +414,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/01/07/k8s的创建pod的流程/" rel="prev" title="k8s创建pod的流程">
-                k8s创建pod的流程 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/01/17/如何使用swagger整合api/" rel="prev" title="如何使用swagger整合api">
+                如何使用swagger整合api <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

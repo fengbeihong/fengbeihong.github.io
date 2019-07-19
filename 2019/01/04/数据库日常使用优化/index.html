@@ -102,24 +102,30 @@
 
 
 
-  <meta name="description" content="swift配置时，一般会在系统里单独挂载一个目录，然后当修改配置后，有时候会在系统启动时挂载磁盘时出现错误。1Continue to wait; or Press S to skip mounting or M for manual recovery 在配置swift时都会配置/etc/fstab这个文件，会让系统启动时自动挂载设备。想要跳过这个错误，也可以在该配置文件中加参数nobootwait">
+  <meta name="description" content="大表操作在数据量特别少的时候，如何操作都不会影响数据库的使用。但是当表的数据量特别大时，就要万分注意，任何操作可能对数据库服务造成的阻塞都要考虑到。 删除大表如果想删除一张有十几亿条数据的大表，不能直接drop table，因为有可能内存缓冲池里也有该表数据，删除表会去遍历内存缓冲区。会导致内存缓冲区被锁住，以至于整个服务hang住，所有读写都会被堵塞。并且从磁盘中删除几百G的大文件，磁盘IO也会">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Swift的相关问题">
-<meta property="og:url" content="http://yoursite.com/2018/01/07/swift的相关问题/index.html">
+<meta property="og:title" content="数据库日常使用优化">
+<meta property="og:url" content="http://yoursite.com/2019/01/04/数据库日常使用优化/index.html">
 <meta property="og:site_name" content="fengbeihong">
-<meta property="og:description" content="swift配置时，一般会在系统里单独挂载一个目录，然后当修改配置后，有时候会在系统启动时挂载磁盘时出现错误。1Continue to wait; or Press S to skip mounting or M for manual recovery 在配置swift时都会配置/etc/fstab这个文件，会让系统启动时自动挂载设备。想要跳过这个错误，也可以在该配置文件中加参数nobootwait">
+<meta property="og:description" content="大表操作在数据量特别少的时候，如何操作都不会影响数据库的使用。但是当表的数据量特别大时，就要万分注意，任何操作可能对数据库服务造成的阻塞都要考虑到。 删除大表如果想删除一张有十几亿条数据的大表，不能直接drop table，因为有可能内存缓冲池里也有该表数据，删除表会去遍历内存缓冲区。会导致内存缓冲区被锁住，以至于整个服务hang住，所有读写都会被堵塞。并且从磁盘中删除几百G的大文件，磁盘IO也会">
 <meta property="og:locale" content="default">
-<meta property="og:updated_time" content="2018-01-07T08:06:56.000Z">
+<meta property="og:image" content="http://yoursite.com/2019/01/04/数据库日常使用优化/images/1546573799696.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/01/04/数据库日常使用优化/images/1546574063527.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/01/04/数据库日常使用优化/images/1546574280400.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/01/04/数据库日常使用优化/images/1546582003025.jpg">
+<meta property="og:image" content="http://yoursite.com/2019/01/04/数据库日常使用优化/images/1546582705500.jpg">
+<meta property="og:updated_time" content="2019-07-19T12:44:45.726Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Swift的相关问题">
-<meta name="twitter:description" content="swift配置时，一般会在系统里单独挂载一个目录，然后当修改配置后，有时候会在系统启动时挂载磁盘时出现错误。1Continue to wait; or Press S to skip mounting or M for manual recovery 在配置swift时都会配置/etc/fstab这个文件，会让系统启动时自动挂载设备。想要跳过这个错误，也可以在该配置文件中加参数nobootwait">
+<meta name="twitter:title" content="数据库日常使用优化">
+<meta name="twitter:description" content="大表操作在数据量特别少的时候，如何操作都不会影响数据库的使用。但是当表的数据量特别大时，就要万分注意，任何操作可能对数据库服务造成的阻塞都要考虑到。 删除大表如果想删除一张有十几亿条数据的大表，不能直接drop table，因为有可能内存缓冲池里也有该表数据，删除表会去遍历内存缓冲区。会导致内存缓冲区被锁住，以至于整个服务hang住，所有读写都会被堵塞。并且从磁盘中删除几百G的大文件，磁盘IO也会">
+<meta name="twitter:image" content="http://yoursite.com/2019/01/04/数据库日常使用优化/images/1546573799696.jpg">
 
 
 
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/07/swift的相关问题/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/01/04/数据库日常使用优化/"/>
 
 
 
@@ -129,7 +135,7 @@
   };
 </script>
 
-  <title>Swift的相关问题 | fengbeihong</title>
+  <title>数据库日常使用优化 | fengbeihong</title>
   
 
 
@@ -277,7 +283,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/07/swift的相关问题/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/01/04/数据库日常使用优化/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="fengbeihong">
@@ -294,7 +300,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Swift的相关问题
+          <h1 class="post-title" itemprop="name headline">数据库日常使用优化
               
             
           </h1>
@@ -319,12 +325,24 @@
                 
               
 
-              <time title="Created: 2018-01-07 07:59:42 / Modified: 16:06:56" itemprop="dateCreated datePublished" datetime="2018-01-07T07:59:42+08:00">2018-01-07</time>
+              <time title="Created: 2019-01-04 10:37:14" itemprop="dateCreated datePublished" datetime="2019-01-04T10:37:14+08:00">2019-01-04</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-07-19 20:44:45" itemprop="dateModified" datetime="2019-07-19T20:44:45+08:00">2019-07-19</time>
               
             
           </span>
@@ -357,17 +375,43 @@
       
 
       
-        <p>swift配置时，一般会在系统里单独挂载一个目录，然后当修改配置后，有时候会在系统启动时挂载磁盘时出现错误。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Continue to wait; or Press S to skip mounting or M for manual recovery</span><br></pre></td></tr></table></figure></p>
-<p>在配置swift时都会配置<code>/etc/fstab</code>这个文件，会让系统启动时自动挂载设备。<br>想要跳过这个错误，也可以在该配置文件中加参数<code>nobootwait</code></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UUID=1234-5678 /osshare vfat utf8,auto,rw,user,nobootwait 0 0</span><br></pre></td></tr></table></figure>
-<p>具体的可以<code>man fstab</code>来查看相关信息</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">The  mountall(8) program that mounts filesystem during boot also recognises additional options that the ordinary  mount(8) tool does not. These are:  bootwait which can be applied to remote filesystems mounted outside of /usr or /var, without which mountall(8) would not hold up the boot for these; nobootwait which can be applied to non-remote filesystems to explicitly instruct mountall(8) not to hold up the boot for them;</span><br></pre></td></tr></table></figure>
-<hr>
-<p>在用devstack安装开发环境后，如果重启，swift服务经常就不能用了。</p>
-<p>根据信息查看了目录mount情况<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">stack@magnum:/opt/stack/solum$ df -h</span><br><span class="line">Filesystem      Size  Used Avail Use% Mounted on</span><br><span class="line">udev            987M  4.0K  987M   1% /dev</span><br><span class="line">tmpfs           200M  544K  200M   1% /run</span><br><span class="line">/dev/dm-0        91G  6.5G   80G   8% /</span><br><span class="line">none            4.0K     0  4.0K   0% /sys/fs/cgroup</span><br><span class="line">none            5.0M     0  5.0M   0% /run/lock</span><br><span class="line">none           1000M  944K  999M   1% /run/shm</span><br><span class="line">none            100M     0  100M   0% /run/user</span><br><span class="line">/dev/sda1       236M   41M  183M  19% /boot</span><br></pre></td></tr></table></figure></p>
-<p>少了一个和swift相关的挂载<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/dev/loop0      6.0G  873M  5.2G  15% /opt/stack/data/swift/drives/sdb1</span><br></pre></td></tr></table></figure></p>
-<p>找到默认情况下，swift创建的swift.img，然后手动挂载上去<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount -t xfs -o loop,noatime,nodiratime,nobarrier,logbufs=8 /opt/stack/data/swift/drives/images/swift.img /opt/stack/data/swift/drives/sdb1/</span><br></pre></td></tr></table></figure></p>
-<p>最后还要把这个加到<code>/etc/fstab</code>里，重启时自动挂载，注意这里也加了上面提到的<code>nobootwait</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/opt/stack/data/swift/drives/sdb1/ /opt/stack/data/swift/drives/images/swift.img xfs noatime,nodiratime,nobootwait,nobarrier,logbufs=8 0 0</span><br></pre></td></tr></table></figure></p>
+        <h2 id="大表操作"><a href="#大表操作" class="headerlink" title="大表操作"></a>大表操作</h2><p>在数据量特别少的时候，如何操作都不会影响数据库的使用。但是当表的数据量特别大时，就要万分注意，任何操作可能对数据库服务造成的阻塞都要考虑到。</p>
+<h5 id="删除大表"><a href="#删除大表" class="headerlink" title="删除大表"></a>删除大表</h5><p>如果想删除一张有十几亿条数据的大表，不能直接<code>drop table</code>，因为有可能内存缓冲池里也有该表数据，删除表会去遍历内存缓冲区。会导致内存缓冲区被锁住，以至于整个服务hang住，所有读写都会被堵塞。并且从磁盘中删除几百G的大文件，磁盘IO也会瞬间打满，会对性能造成很大影响。比较安全的操作就是批量的删除数据，最后再drop回收空间。</p>
+<h5 id="在线DDL"><a href="#在线DDL" class="headerlink" title="在线DDL"></a>在线DDL</h5><p>线上环境的DDL一般会用到一些专用的工具，避免直接执行造成服务使用异常。</p>
+<h6 id="Mysql5-5的DDL工具"><a href="#Mysql5-5的DDL工具" class="headerlink" title="Mysql5.5的DDL工具"></a>Mysql5.5的DDL工具</h6><p><img src="images/1546573799696.jpg" alt=""></p>
+<p>copy数据的过长需要耗费额外的存储空间，并且执行过程耗时较长。copy数据过程中有锁，堵塞了写操作</p>
+<h6 id="mysql5-6、5-7原生Online-DDL"><a href="#mysql5-6、5-7原生Online-DDL" class="headerlink" title="mysql5.6、5.7原生Online-DDL"></a>mysql5.6、5.7原生Online-DDL</h6><p>MYSQL 5.6之后，支持更多的<code>ALTER TABLE</code>类型避免<code>copy data</code>操作，并且支持在DDL的过程中不阻塞DML操作，即实现ONLINE特性。</p>
+<p><img src="images/1546574063527.jpg" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ALTER TABLE  TABLE_NAME  ADD COLUMN _new_column  ALGORITHM = inplace, LOCK = default;</span><br></pre></td></tr></table></figure>
+<p>ALGORITHM选项</p>
+<ul>
+<li>INPLACE</li>
+<li>COPY</li>
+<li>DEFAULT</li>
+</ul>
+<p>LOCK选项 </p>
+<ul>
+<li>NONE</li>
+<li>SHARED</li>
+<li>DEFAULT</li>
+<li>EXCLUISIVE</li>
+</ul>
+<p><img src="images/1546574280400.jpg" alt=""></p>
+<ul>
+<li>仍然存在排他锁，有锁等待的风险。</li>
+<li>跟5.6一样，增量日志大小是有限制的，由innodb_online_alter_log_max_size参数决定大小</li>
+<li>有可能造成主从延迟</li>
+<li>无法暂停，只能中断</li>
+</ul>
+<h6 id="pt-online-schema-change"><a href="#pt-online-schema-change" class="headerlink" title="pt-online-schema-change"></a>pt-online-schema-change</h6><p>整个过程，只有第五步的时候会进行锁表，阻塞服务，时间极短</p>
+<p><img src="images/1546582003025.jpg" alt=""></p>
+<h6 id="Online-DDL与PT-OSC对比"><a href="#Online-DDL与PT-OSC对比" class="headerlink" title="Online DDL与PT-OSC对比"></a>Online DDL与PT-OSC对比</h6><p><img src="images/1546582705500.jpg" alt=""></p>
+<ul>
+<li>1.原表不能存在触发器。</li>
+<li>2.原表必须存在主键 PRIMARY KEY 或者 UNIQUE KEY</li>
+<li>3.外键的处理需要指定 alter-foreign-keys-method 参数，存在风险</li>
+<li>4.在 pt-osc 的执行过程中，如果有对主键的更新操作则会出现重复的数据</li>
+</ul>
 
       
     </div>
@@ -395,8 +439,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/07/ironic和magnum中遇到的错误/" rel="next" title="Ironic和magnum中遇到的错误">
-                <i class="fa fa-chevron-left"></i> Ironic和magnum中遇到的错误
+              <a href="/2018/05/07/k8s里的pause镜像/" rel="next" title="k8s里的pause镜像">
+                <i class="fa fa-chevron-left"></i> k8s里的pause镜像
               </a>
             
           </div>
@@ -405,8 +449,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/01/07/k8s的创建pod的流程/" rel="prev" title="k8s创建pod的流程">
-                k8s创建pod的流程 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/01/04/数据库锁/" rel="prev" title="数据库锁">
+                数据库锁 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -456,8 +500,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -517,6 +570,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#大表操作"><span class="nav-number">1.</span> <span class="nav-text">大表操作</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#删除大表"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">删除大表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#在线DDL"><span class="nav-number">1.0.0.2.</span> <span class="nav-text">在线DDL</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#Mysql5-5的DDL工具"><span class="nav-number">1.0.0.2.1.</span> <span class="nav-text">Mysql5.5的DDL工具</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#mysql5-6、5-7原生Online-DDL"><span class="nav-number">1.0.0.2.2.</span> <span class="nav-text">mysql5.6、5.7原生Online-DDL</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#pt-online-schema-change"><span class="nav-number">1.0.0.2.3.</span> <span class="nav-text">pt-online-schema-change</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Online-DDL与PT-OSC对比"><span class="nav-number">1.0.0.2.4.</span> <span class="nav-text">Online DDL与PT-OSC对比</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

@@ -102,18 +102,18 @@
 
 
 
-  <meta name="description" content="数据库锁 全局锁1flush table with read lock   全局锁：对整个数据库实例加锁，MySQL提供一个加全局锁的方法：Flush tables with read lock(FTWRL)，这条语句可以让数据库处于只读状态，所有的写操作将被堵塞；全局锁的典型应用场景就是做全库的逻辑备份，即是把整个库 数据查询出来，保存为文本； 表级锁：一种是表锁，另一种是元数据锁(meta d">
+  <meta name="description" content="数据库锁全局锁1flush table with read lock 全局锁：对整个数据库实例加锁，MySQL提供一个加全局锁的方法：Flush tables with read lock(FTWRL)，这条语句可以让数据库处于只读状态，所有的写操作将被堵塞；全局锁的典型应用场景就是做全库的逻辑备份，即是把整个库 数据查询出来，保存为文本； 表级锁 表锁 locktables table_name">
 <meta property="og:type" content="article">
 <meta property="og:title" content="数据库锁">
 <meta property="og:url" content="http://yoursite.com/2019/01/04/数据库锁/index.html">
 <meta property="og:site_name" content="fengbeihong">
-<meta property="og:description" content="数据库锁 全局锁1flush table with read lock   全局锁：对整个数据库实例加锁，MySQL提供一个加全局锁的方法：Flush tables with read lock(FTWRL)，这条语句可以让数据库处于只读状态，所有的写操作将被堵塞；全局锁的典型应用场景就是做全库的逻辑备份，即是把整个库 数据查询出来，保存为文本； 表级锁：一种是表锁，另一种是元数据锁(meta d">
+<meta property="og:description" content="数据库锁全局锁1flush table with read lock 全局锁：对整个数据库实例加锁，MySQL提供一个加全局锁的方法：Flush tables with read lock(FTWRL)，这条语句可以让数据库处于只读状态，所有的写操作将被堵塞；全局锁的典型应用场景就是做全库的逻辑备份，即是把整个库 数据查询出来，保存为文本； 表级锁 表锁 locktables table_name">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/2019/01/04/数据库锁/images/1546585163367.jpg">
-<meta property="og:updated_time" content="2019-01-04T10:48:22.000Z">
+<meta property="og:updated_time" content="2019-07-19T12:53:32.607Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="数据库锁">
-<meta name="twitter:description" content="数据库锁 全局锁1flush table with read lock   全局锁：对整个数据库实例加锁，MySQL提供一个加全局锁的方法：Flush tables with read lock(FTWRL)，这条语句可以让数据库处于只读状态，所有的写操作将被堵塞；全局锁的典型应用场景就是做全库的逻辑备份，即是把整个库 数据查询出来，保存为文本； 表级锁：一种是表锁，另一种是元数据锁(meta d">
+<meta name="twitter:description" content="数据库锁全局锁1flush table with read lock 全局锁：对整个数据库实例加锁，MySQL提供一个加全局锁的方法：Flush tables with read lock(FTWRL)，这条语句可以让数据库处于只读状态，所有的写操作将被堵塞；全局锁的典型应用场景就是做全库的逻辑备份，即是把整个库 数据查询出来，保存为文本； 表级锁 表锁 locktables table_name">
 <meta name="twitter:image" content="http://yoursite.com/2019/01/04/数据库锁/images/1546585163367.jpg">
 
 
@@ -321,12 +321,24 @@
                 
               
 
-              <time title="Created: 2019-01-04 18:47:51 / Modified: 18:48:22" itemprop="dateCreated datePublished" datetime="2019-01-04T18:47:51+08:00">2019-01-04</time>
+              <time title="Created: 2019-01-04 18:47:51" itemprop="dateCreated datePublished" datetime="2019-01-04T18:47:51+08:00">2019-01-04</time>
             
 
             
               
 
+              
+                
+                <span class="post-meta-divider">|</span>
+                
+
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">Edited on</span>
+                
+                <time title="Modified: 2019-07-19 20:53:32" itemprop="dateModified" datetime="2019-07-19T20:53:32+08:00">2019-07-19</time>
               
             
           </span>
@@ -359,44 +371,41 @@
       
 
       
-        <h5 id="数据库锁"><a href="#数据库锁" class="headerlink" title="数据库锁"></a>数据库锁</h5><ul>
-<li>全局锁<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flush table with read lock</span><br></pre></td></tr></table></figure>
-</li>
-</ul>
+        <h3 id="数据库锁"><a href="#数据库锁" class="headerlink" title="数据库锁"></a>数据库锁</h3><h4 id="全局锁"><a href="#全局锁" class="headerlink" title="全局锁"></a>全局锁</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">flush table with read lock</span><br></pre></td></tr></table></figure>
 <p>全局锁：对整个数据库实例加锁，MySQL提供一个加全局锁的方法：Flush tables with read lock(FTWRL)，这条语句可以让数据库处于只读状态，所有的写操作将被堵塞；全局锁的典型应用场景就是做全库的逻辑备份，即是把整个库 数据查询出来，保存为文本；</p>
-<p>表级锁：一种是表锁，另一种是元数据锁(meta data lock，MDL锁)；表锁，在修改表、或者显示加锁会出现，元数据锁，在事务开始时候加上，是为了保证在并发的情况下，结构变更的一致性，也就是说，事务开始时候，要去做改表操作，必须等待这个事务完成，会堵塞DDL操作。</p>
-<ul>
-<li>表级锁<ul>
+<h4 id="表级锁"><a href="#表级锁" class="headerlink" title="表级锁"></a>表级锁</h4><ul>
 <li>表锁 locktables table_name read/write</li>
 <li>元数据锁 meta data link, MDL</li>
 </ul>
-</li>
-<li>行锁 record lock</li>
-</ul>
-<p>对包含索引列做操作时会产生，在并发的系统下，行锁是不可缺少的，但是行锁在提高并发性的同时，又会带来一些性能问题<br>行锁： 开销大，加锁慢；会出现死锁；锁定粒度小，发生锁冲突的概率低，并发度高</p>
+<p>表级锁：一种是表锁，另一种是元数据锁(meta data lock，MDL锁)；表锁，在修改表、或者显示加锁会出现，元数据锁，在事务开始时候加上，是为了保证在并发的情况下，结构变更的一致性，也就是说，事务开始时候，要去做改表操作，必须等待这个事务完成，会堵塞DDL操作。</p>
+<h3 id="行锁-record-lock"><a href="#行锁-record-lock" class="headerlink" title="行锁 record lock"></a>行锁 record lock</h3><p>对包含索引列做操作时会产生，在并发的系统下，行锁是不可缺少的，但是行锁在提高并发性的同时，又会带来一些性能问题<br>行锁： 开销大，加锁慢；会出现死锁；锁定粒度小，发生锁冲突的概率低，并发度高</p>
+<hr>
 <p>如何避免？减少锁争用，程序中尽可能使用自动提交，短事务</p>
 <p><img src="images/1546585163367.jpg" alt=""></p>
-<p>Innodb_row_lock_current_waits：当前等待锁的数量<br>Innodb_row_lock_time：系统启动到现在、锁定的总时间长度<br>Innodb_row_lock_time_avg：每次平均锁定的时间   I<br>nnodb_row_lock_time_max：最长一次锁定时间<br>Innodb_row_lock_waits：系统启动到现在、总共锁定次数</p>
-<p>行锁： 开销大，加锁慢；会出现死锁；锁定粒度小，发生锁冲突的概率低，并发度高<br>如何避免？减少锁争用，程序中尽可能使用自动提交，短事务</p>
-<p>减少锁争用</p>
 <ul>
+<li>Innodb_row_lock_current_waits：当前等待锁的数量   </li>
+<li>Innodb_row_lock_time：系统启动到现在、锁定的总时间长度   </li>
+<li>Innodb_row_lock_time_avg：每次平均锁定的时间   I</li>
+<li>nnodb_row_lock_time_max：最长一次锁定时间   </li>
+<li>Innodb_row_lock_waits：系统启动到现在、总共锁定次数</li>
+</ul>
+<h5 id="减少锁争用"><a href="#减少锁争用" class="headerlink" title="减少锁争用"></a>减少锁争用</h5><ul>
 <li>尽可能让所有的数据检索都通过索引来完成，避免Innodb因为无法通过索引键加锁而升级为表级锁定</li>
 <li>合理设计索引，让Innodb在索引键上面加锁尽可能准确，缩小锁定范围，避免造成不必要的锁定而影响其他Query的执行</li>
 <li>尽可能减少基于范围的数据检索过滤条件，避免间隙锁带来的负面影响而锁定了不该锁定的记录</li>
 <li>尽量控制事务的大小，减少锁定的资源量和锁定时间长度</li>
 <li>在业务环境允许的情况下，尽量使用较低级别的事务隔离，以减少MySQL因为实现事务隔离级别所带来的附加成本</li>
 </ul>
-<p>死锁避免</p>
-<ul>
+<h5 id="死锁避免"><a href="#死锁避免" class="headerlink" title="死锁避免"></a>死锁避免</h5><ul>
 <li>同类的业务模块中，尽可能按照相同的访问顺序来访问，防止产生死锁 </li>
 <li>在同一个事务中，尽可能做到一次锁定所需要的所有资源，减少死锁产生概率</li>
 </ul>
 <blockquote>
 <p>对于非常容易产生死锁的业务部分，可以尝试使用升级锁定颗粒度，通过表级锁定来减少死锁产生的概率</p>
 </blockquote>
-<p>隔离级别</p>
-<p>GAP锁</p>
-<p>特点：锁定一个范围，但不包括记录本身<br>作用：为了防止同一事务的两次当前读，出现幻读的情况</p>
+<h4 id="GAP锁-间隙锁"><a href="#GAP锁-间隙锁" class="headerlink" title="GAP锁 间隙锁"></a>GAP锁 间隙锁</h4><p>特点：锁定一个范围，但不包括记录本身<br>作用：为了防止同一事务的两次当前读，出现幻读的情况</p>
+<p>在可重复读隔离级别下，为了防止幻读，会对某行数据的前后添加间隙锁，不包含某行数据本身</p>
+<p>行锁和间隙锁合成为<code>next-key lock</code></p>
 
       
     </div>
@@ -424,8 +433,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/01/04/数据库日常/" rel="next" title="数据库日常">
-                <i class="fa fa-chevron-left"></i> 数据库日常
+              <a href="/2019/01/04/数据库日常使用优化/" rel="next" title="数据库日常使用优化">
+                <i class="fa fa-chevron-left"></i> 数据库日常使用优化
               </a>
             
           </div>
@@ -565,7 +574,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-5"><a class="nav-link" href="#数据库锁"><span class="nav-number">1.</span> <span class="nav-text">数据库锁</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#数据库锁"><span class="nav-number">1.</span> <span class="nav-text">数据库锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#全局锁"><span class="nav-number">1.1.</span> <span class="nav-text">全局锁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#表级锁"><span class="nav-number">1.2.</span> <span class="nav-text">表级锁</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#行锁-record-lock"><span class="nav-number">2.</span> <span class="nav-text">行锁 record lock</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#减少锁争用"><span class="nav-number">2.0.1.</span> <span class="nav-text">减少锁争用</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#死锁避免"><span class="nav-number">2.0.2.</span> <span class="nav-text">死锁避免</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GAP锁-间隙锁"><span class="nav-number">2.1.</span> <span class="nav-text">GAP锁 间隙锁</span></a></li></ol></li></ol></div>
             
 
           </div>
